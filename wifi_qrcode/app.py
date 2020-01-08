@@ -19,16 +19,18 @@ class ValidateInputStatus(Enum):
 
 
 def fire_app(ssid: str,
-             auth: str = AuthType.nopass.name,
+             auth: str = AuthType.WPA.name,
              password: Optional[str] = None,
              hidden: bool = False,
              output: str = DEFAULT_FILE_NAME) -> None:
 
+    ssid = str(ssid)
+    password = str(password)
     status = ValidateInputStatus.Success
     auth_type = AuthType.nopass
 
     try:
-        auth_type = AuthType[auth]
+        auth_type = AuthType[auth.upper()]
 
         if auth_type is not AuthType.nopass and not password:
             status = ValidateInputStatus.EmptyPassword
