@@ -13,6 +13,12 @@ pip install -U wifi_qrcode
 wifi_qrcode --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
 ```
 
+or as python module
+
+```bash
+python -m wifi_qrcode --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
+```
+
 # Arguments
 
 ## Required
