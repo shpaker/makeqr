@@ -1,11 +1,7 @@
-import sys
 from enum import Enum, unique, auto
-from os import getcwd
-from os import path
 from typing import Optional
 
 import qrcode
-from fire import Fire
 from qrcode.image.svg import SvgImage
 
 
@@ -22,17 +18,8 @@ class FileFormat(Enum):
     PNG = auto()
 
 
-@unique
-class ValidateInputStatus(Enum):
-    Success = 0
-    UnknownAuthType = 1
-    EmptyPassword = 2
-
-
 QR_FILL_COLOR: str = 'black'
 QR_BACK_COLOR: str = 'white'
-DEFAULT_FILE_NAME: str = 'wifi_qrcode'
-DEFAULT_FILE_FORMAT: FileFormat = FileFormat.PNG
 MECARD_SPECIAL_CHARACTERS: str = '\;,:"'
 
 
@@ -74,48 +61,3 @@ def save_wifi_qrcode(ssid: str, auth: AuthType, password: Optional[str],
 
     with open(file_path, 'wb') as file:
         img.save(file)
-
-
-def fire_app(ssid: str,
-             auth: str = AuthType.nopass.name,
-             password: Optional[str] = None,
-             hidden: bool = False,
-             output: str = DEFAULT_FILE_NAME) -> None:
-
-    status = ValidateInputStatus.Success
-    auth_type = AuthType.nopass
-
-    try:
-        auth_type = AuthType[auth]
-
-        if auth_type is not AuthType.nopass and not password:
-            status = ValidateInputStatus.EmptyPassword
-    except KeyError:
-        status = ValidateInputStatus.UnknownAuthType
-
-    try:
-        file_ext = output.split('.')[-1]
-        file_format = FileFormat[file_ext.upper()]
-    except KeyError:
-        file_format = DEFAULT_FILE_FORMAT
-        output = f'{output}.{DEFAULT_FILE_FORMAT.name.lower()}'
-
-    file_path = path.join(getcwd(), output)
-
-    if status is ValidateInputStatus.Success:
-        save_wifi_qrcode(ssid=ssid,
-                         auth=auth_type,
-                         password=password,
-                         hidden=hidden,
-                         file_format=file_format,
-                         file_path=file_path)
-
-    print(f'Format: {file_format.name}')
-    print(f'Path: {file_path}')
-    print(f'Status: {status.name}')
-
-    sys.exit(status.value)
-
-
-if __name__ == '__main__':
-    Fire(fire_app)
