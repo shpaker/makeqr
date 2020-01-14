@@ -1,7 +1,7 @@
 from enum import Enum, unique
 from os import getcwd
 from os import path
-from typing import Optional
+from typing import Optional, Union
 
 from fire import Fire
 
@@ -18,14 +18,12 @@ class ValidateInputStatus(Enum):
     EmptyPassword = 2
 
 
-def fire_app(ssid: str,
+def fire_app(ssid: Union[str, int],
              auth: str = AuthType.WPA.name,
-             password: Optional[str] = None,
+             password: Optional[Union[str, int]] = None,
              hidden: bool = False,
              output: str = DEFAULT_FILE_NAME) -> None:
 
-    ssid = str(ssid)
-    password = str(password)
     status = ValidateInputStatus.Success
     auth_type = AuthType.nopass
 
