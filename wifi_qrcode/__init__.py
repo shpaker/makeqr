@@ -1,9 +1,12 @@
 from enum import Enum, unique, auto
-from typing import Optional, Union, Dict
+from typing import Optional, Union, Dict, List, Tuple
+from urllib.parse import quote
 
 import qrcode
 from qrcode.image.pil import PilImage
 from qrcode.image.svg import SvgImage
+
+MECARD_SPECIAL_CHARACTERS: str = '\;,:"'
 
 
 class AuthType(Enum):
@@ -14,7 +17,7 @@ class AuthType(Enum):
 
 
 @unique
-class FileFormat(Enum):
+class ImageFormat(Enum):
     SVG = auto()
     PNG = auto()
 
@@ -27,21 +30,25 @@ class WifiMecardParam(Enum):
     PASSWORD = 'P'
 
 
-QR_FILL_COLOR: str = 'black'
-QR_BACK_COLOR: str = 'white'
-MECARD_SPECIAL_CHARACTERS: str = '\;,:"'
+@unique
+class DataType(Enum):
+    WIFI = 'WIFI'
+    MAILTO = 'mailto'
+    # TEL = 'tel'
+    # SMS = 'sms'
+    # FACETIME = 'facetime'
+    # FACETIME_AUDIO = 'facetime-audio'
+    # GEO = 'geo'
+    # MARKET = 'market'
 
-
-def make_mecard_data(title: str,
-                     fields: Dict[WifiMecardParam, str],
-                     end='') -> str:
+def make_mecard_data(title: str, fields: Dict[WifiMecardParam, str]) -> str:
 
     fields_list = list()
 
     for field, value in fields.items():
         fields_list.append(f'{field.value}:{value}')
 
-    mecard_data = f'{title}:{";".join(fields_list)}{end}'
+    mecard_data = f'{title}:{";".join(fields_list)};;'
 
     return mecard_data
 
@@ -70,14 +77,42 @@ def make_wifi_data(ssid: Union[str, int],
     if auth is not AuthType.nopass and password:
         fields[WifiMecardParam.PASSWORD] = password
 
-    wifi_data = make_mecard_data(title='WIFI', fields=fields, end=';;')
+    wifi_data = make_mecard_data(title=DataType.WIFI.value, fields=fields)
 
     return wifi_data
 
 
-def make_image(data: str, file_format: FileFormat, **kwargs) -> PilImage:
+def make_mailto_data(mail: str,
+                     subject: Optional[str] = None,
+                     cc: Optional[Union[List[str], str]] = None,
+                     bcc: Optional[Union[List[str], str]] = None,
+                     body: Optional[str] = None) -> str:
 
-    image_factory = None if file_format is FileFormat.PNG else qrcode.image.svg.SvgImage
+    data = f'{DataType.MAILTO.value}:{mail}'
+    args = list()
+
+    if subject:
+        args.append(f'subject={quote(subject)}')
+
+    if cc:
+        args.append(f'cc={quote(",".join(cc))}')
+
+    if bcc:
+        args.append(f'bcc={quote(",".join(bcc))}')
+
+    if body:
+        args.append(f'body={quote(body)}')
+
+    if args:
+        data = f'{data}?{"&".join(args)}'
+
+    return data
+
+
+def make_image(data: str, file_format: ImageFormat,
+               **kwargs) -> Union[PilImage, SvgImage]:
+
+    image_factory = None if file_format is ImageFormat.PNG else qrcode.image.svg.SvgImage
 
     qrcode_data = qrcode.QRCode(
         error_correction=qrcode.constants.ERROR_CORRECT_H)
@@ -87,21 +122,3 @@ def make_image(data: str, file_format: FileFormat, **kwargs) -> PilImage:
     img = qrcode_data.make_image(image_factory=image_factory, **kwargs)
 
     return img
-
-
-def save_wifi_qrcode(ssid: str, auth: AuthType, password: Optional[str],
-                     hidden: bool, file_format: FileFormat,
-                     file_path: str) -> None:
-
-    wifi_data = make_wifi_data(ssid=ssid,
-                               auth=auth,
-                               password=password,
-                               hidden=hidden)
-
-    img = make_image(data=wifi_data,
-                     file_format=file_format,
-                     fill_color=QR_FILL_COLOR,
-                     back_color=QR_BACK_COLOR)
-
-    with open(file_path, 'wb') as file:
-        img.save(file)

@@ -4,63 +4,123 @@ from os import path
 from typing import Optional, Union
 
 from fire import Fire
+from qrcode.image.pil import PilImage
+from qrcode.image.svg import SvgImage
 
-from wifi_qrcode import AuthType, FileFormat, save_wifi_qrcode
+from wifi_qrcode import AuthType, ImageFormat, make_wifi_data, make_mailto_data, make_image
 
-DEFAULT_FILE_NAME: str = 'wifi_qrcode'
-DEFAULT_FILE_FORMAT: FileFormat = FileFormat.PNG
+DEFAULT_FILE_NAME: str = 'qrcode'
+DEFAULT_FILE_FORMAT: ImageFormat = ImageFormat.PNG
+
+QR_FILL_COLOR: str = 'black'
+QR_BACK_COLOR: str = 'white'
 
 
 @unique
 class ValidateInputStatus(Enum):
-    Success = 0
-    UnknownAuthType = 1
-    EmptyPassword = 2
+    SUCCESS = 0
+    WIFI_UNKNOWN_AUTH_TYPE = 1
+    WIFI_EMPTY_PASSWORD = 2
 
 
-def fire_app(ssid: Union[str, int],
+class App:
+    def __init__(self) -> None:
+        self.status: ValidateInputStatus = ValidateInputStatus.SUCCESS
+        self.file_format: Optional[ImageFormat] = None
+        self.file_path: Optional[str] = None
+
+    def _parse_file_name(self, file_name: str) -> str:
+        try:
+            file_ext = file_name.split('.')[-1]
+            self.file_format = ImageFormat[file_ext.upper()]
+        except KeyError:
+            self.file_format = DEFAULT_FILE_FORMAT
+            file_name = f'{file_name}.{DEFAULT_FILE_FORMAT.name.lower()}'
+
+        self.file_path = path.join(getcwd(), file_name)
+
+        print(f'Format: {self.file_format.name}')
+        print(f'Path: {self.file_path}')
+
+        return self.file_path
+
+    def _save(self, img: Union[PilImage, SvgImage]) -> None:
+        print(f'Status: {self.status.name}')
+
+        with open(self.file_path, 'wb') as file:
+            img.save(file)
+
+        exit(self.status.value)
+
+    def wifi(self,
+             ssid: Union[str, int],
              auth: str = AuthType.WPA.name,
              password: Optional[Union[str, int]] = None,
              hidden: bool = False,
              output: str = DEFAULT_FILE_NAME) -> None:
 
-    status = ValidateInputStatus.Success
-    auth_type = AuthType.nopass
+        self._parse_file_name(output)
 
-    try:
-        auth_type = AuthType[auth.upper()]
+        auth_type = AuthType.nopass
 
-        if auth_type is not AuthType.nopass and not password:
-            status = ValidateInputStatus.EmptyPassword
-    except KeyError:
-        status = ValidateInputStatus.UnknownAuthType
+        try:
+            auth_type = AuthType[auth.upper()]
 
-    try:
-        file_ext = output.split('.')[-1]
-        file_format = FileFormat[file_ext.upper()]
-    except KeyError:
-        file_format = DEFAULT_FILE_FORMAT
-        output = f'{output}.{DEFAULT_FILE_FORMAT.name.lower()}'
+            if auth_type is not AuthType.nopass and not password:
+                self.status = ValidateInputStatus.WIFI_EMPTY_PASSWORD
+        except KeyError:
+            self.status = ValidateInputStatus.WIFI_UNKNOWN_AUTH_TYPE
 
-    file_path = path.join(getcwd(), output)
+        if self.status is ValidateInputStatus.SUCCESS:
+            data = make_wifi_data(ssid=ssid,
+                                  auth=auth_type,
+                                  password=password,
+                                  hidden=hidden)
 
-    if status is ValidateInputStatus.Success:
-        save_wifi_qrcode(ssid=ssid,
-                         auth=auth_type,
-                         password=password,
-                         hidden=hidden,
-                         file_format=file_format,
-                         file_path=file_path)
+            print(f'Data: {data}')
 
-    print(f'Format: {file_format.name}')
-    print(f'Path: {file_path}')
-    print(f'Status: {status.name}')
+            img = make_image(data=data,
+                             file_format=self.file_format,
+                             fill_color=QR_FILL_COLOR,
+                             back_color=QR_BACK_COLOR)
 
-    exit(status.value)
+            self._save(img)
+
+    def mailto(self,
+               mail: str,
+               subject: Optional[str] = None,
+               cc: Optional[str] = None,
+               bcc: Optional[str] = None,
+               body: Optional[str] = None,
+               output: str = DEFAULT_FILE_NAME) -> None:
+
+        self._parse_file_name(output)
+
+        if cc:
+            cc = cc.split(',')
+
+        if bcc:
+            bcc = bcc.split(',')
+
+        data = make_mailto_data(mail=mail,
+                                subject=subject,
+                                cc=cc,
+                                bcc=bcc,
+                                body=body)
+
+        print(f'Data: {data}')
+
+        img = make_image(data=data,
+                         file_format=self.file_format,
+                         fill_color=QR_FILL_COLOR,
+                         back_color=QR_BACK_COLOR)
+
+        self._save(img)
 
 
 def main():
-    Fire(fire_app)
+    app = App()
+    Fire(app)
 
 
 if __name__ == '__main__':
