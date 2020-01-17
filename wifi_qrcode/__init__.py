@@ -36,10 +36,11 @@ class DataType(Enum):
     MAILTO = 'mailto'
     # TEL = 'tel'
     # SMS = 'sms'
+    # GEO = 'geo'
     # FACETIME = 'facetime'
     # FACETIME_AUDIO = 'facetime-audio'
-    # GEO = 'geo'
     # MARKET = 'market'
+
 
 def make_mecard_data(title: str, fields: Dict[WifiMecardParam, str]) -> str:
 
@@ -82,13 +83,13 @@ def make_wifi_data(ssid: Union[str, int],
     return wifi_data
 
 
-def make_mailto_data(mail: str,
+def make_mailto_data(to: str,
                      subject: Optional[str] = None,
                      cc: Optional[Union[List[str], str]] = None,
                      bcc: Optional[Union[List[str], str]] = None,
                      body: Optional[str] = None) -> str:
 
-    data = f'{DataType.MAILTO.value}:{mail}'
+    data = f'{DataType.MAILTO.value}:{to}'
     args = list()
 
     if subject:

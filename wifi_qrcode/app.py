@@ -87,7 +87,7 @@ class App:
             self._save(img)
 
     def mailto(self,
-               mail: str,
+               to: str,
                subject: Optional[str] = None,
                cc: Optional[str] = None,
                bcc: Optional[str] = None,
@@ -102,7 +102,7 @@ class App:
         if bcc:
             bcc = bcc.split(',')
 
-        data = make_mailto_data(mail=mail,
+        data = make_mailto_data(to=to,
                                 subject=subject,
                                 cc=cc,
                                 bcc=bcc,
