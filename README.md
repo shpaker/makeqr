@@ -16,7 +16,8 @@ wifi_qrcode --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
 or as python module
 
 ```bash
-python -m wifi_qrcode --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
+python -m wifi_qrcode wifi --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
+python -m wifi_qrcode mailto --to user@mail.org --subject "Mail from QR"
 ```
 
 # Arguments

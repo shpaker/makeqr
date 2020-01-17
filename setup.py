@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="wifi_qrcode",
-    version="1.1.1",
+    version="2.0.0",
     author="Aleksandr Shpak",
     author_email="shpaker@gmail.com",
     description="Generate WiFi Access QR Codes",
