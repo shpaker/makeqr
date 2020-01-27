@@ -7,7 +7,9 @@ from fire import Fire
 from qrcode.image.pil import PilImage
 from qrcode.image.svg import SvgImage
 
-from wifi_qrcode import AuthType, ImageFormat, make_wifi_data, make_mailto_data, make_image
+from wifi_qrcode import AuthType, ImageFormat
+from wifi_qrcode.makers import make_wifi, make_mailto
+from wifi_qrcode.utils import make_image
 
 DEFAULT_FILE_NAME: str = 'qrcode'
 DEFAULT_FILE_FORMAT: ImageFormat = ImageFormat.PNG
@@ -72,10 +74,10 @@ class App:
             self.status = ValidateInputStatus.WIFI_UNKNOWN_AUTH_TYPE
 
         if self.status is ValidateInputStatus.SUCCESS:
-            data = make_wifi_data(ssid=ssid,
-                                  auth=auth_type,
-                                  password=password,
-                                  hidden=hidden)
+            data = make_wifi(ssid=ssid,
+                             auth=auth_type,
+                             password=password,
+                             hidden=hidden)
 
             print(f'Data: {data}')
 
@@ -102,11 +104,7 @@ class App:
         if bcc:
             bcc = bcc.split(',')
 
-        data = make_mailto_data(to=to,
-                                subject=subject,
-                                cc=cc,
-                                bcc=bcc,
-                                body=body)
+        data = make_mailto(to=to, subject=subject, cc=cc, bcc=bcc, body=body)
 
         print(f'Data: {data}')
 
