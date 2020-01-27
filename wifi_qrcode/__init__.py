@@ -1,5 +1,5 @@
 from enum import Enum, unique, auto
-from typing import Optional, Union, Dict, List, Tuple
+from typing import Optional, Union, Dict, List
 from urllib.parse import quote
 
 import qrcode
@@ -31,12 +31,12 @@ class WifiMecardParam(Enum):
 
 
 @unique
-class DataType(Enum):
+class DataScheme(Enum):
     WIFI = 'WIFI'
     MAILTO = 'mailto'
-    # TEL = 'tel'
-    # SMS = 'sms'
-    # GEO = 'geo'
+    TEL = 'tel'
+    SMS = 'sms'
+    GEO = 'geo'
     # FACETIME = 'facetime'
     # FACETIME_AUDIO = 'facetime-audio'
     # MARKET = 'market'
@@ -52,6 +52,32 @@ def make_mecard_data(title: str, fields: Dict[WifiMecardParam, str]) -> str:
     mecard_data = f'{title}:{";".join(fields_list)};;'
 
     return mecard_data
+
+
+def make_link_data(schema: Optional[DataScheme] = None,
+                   link: Optional[Union[List[str], str]] = None,
+                   params: Optional[Dict[str, str]] = None) -> str:
+
+    if isinstance(link, str):
+        link = [link]
+
+    if not link:
+        link = list()
+
+    link_str = ','.join(link)
+    data = link_str
+
+    if schema:
+        data = f'{schema.value}:{data}'
+
+    if params:
+        params = {str(param): quote(str(params[param])) for param in params}
+        concatenation_char = '&' if '?' in link_str else '?'
+        params_list = [f'{param}={value}' for param, value in params.items()]
+        params_string = '&'.join(params_list)
+        data = f'{data}{concatenation_char}{params_string}'
+
+    return data
 
 
 def make_wifi_data(ssid: Union[str, int],
@@ -78,7 +104,7 @@ def make_wifi_data(ssid: Union[str, int],
     if auth is not AuthType.nopass and password:
         fields[WifiMecardParam.PASSWORD] = password
 
-    wifi_data = make_mecard_data(title=DataType.WIFI.value, fields=fields)
+    wifi_data = make_mecard_data(title=DataScheme.WIFI.value, fields=fields)
 
     return wifi_data
 
@@ -89,7 +115,7 @@ def make_mailto_data(to: str,
                      bcc: Optional[Union[List[str], str]] = None,
                      body: Optional[str] = None) -> str:
 
-    data = f'{DataType.MAILTO.value}:{to}'
+    data = f'{DataScheme.MAILTO.value}:{to}'
     args = list()
 
     if subject:
@@ -106,6 +132,39 @@ def make_mailto_data(to: str,
 
     if args:
         data = f'{data}?{"&".join(args)}'
+
+    return data
+
+
+def make_link(url: str, params: Optional[Dict[str, str]] = None) -> str:
+
+    data = make_link_data(link=url, params=params)
+
+    return data
+
+
+def make_tel(tel: str) -> str:
+
+    data = make_link_data(schema=DataScheme.TEL, link=tel)
+
+    return data
+
+
+def make_sms(recipients: Optional[List[str]] = None,
+             body: Optional[str] = None) -> str:
+
+    sms_body = dict(body=body)
+    data = make_link_data(schema=DataScheme.SMS,
+                          link=recipients,
+                          params=sms_body)
+
+    return data
+
+
+def make_geo(latitude: float, longitude: float) -> str:
+
+    coords = [str(latitude), str(longitude)]
+    data = make_link_data(schema=DataScheme.GEO, link=coords)
 
     return data
 
