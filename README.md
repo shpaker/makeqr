@@ -29,6 +29,6 @@ python -m wifi_qrcode mailto --to user@mail.org --subject "Mail from QR"
 ## Optional
 
 * `--auth` Authentication type; can be WEP or WPA, or 'nopass' for no password;
-* `--password` Password, ignored if `--auth` is "nopass"; 
+* `--password` Password, ignored if `--auth` is "nopass";
 * `--hidden` True if the network SSID is hidden;
 * `--output` QR-code file. Can be with PNG or SVG extension.
