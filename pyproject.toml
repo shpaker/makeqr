@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "makeqr"
-version = "3.0.0"
+version = "3.0.1"
 description = "Generate QR cards for any occasion"
 authors = ["Aleksandr Shpak <shpaker@gmail.com>"]
 classifiers=[
