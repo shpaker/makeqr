@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import quote
 
-import qrcode  # pylint: disable=import-error
-from qrcode.image.pil import PilImage  # pylint: disable=import-error
-from qrcode.image.svg import SvgImage  # pylint: disable=import-error
+import qrcode
+from qrcode.image.pil import PilImage
+from qrcode.image.svg import SvgImage
 
 from makeqr.enums import DataScheme, ImageType, WifiMecardParam
 

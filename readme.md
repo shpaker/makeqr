@@ -29,6 +29,12 @@ python -m makeqr wifi --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
 python -m makeqr mailto --to user@mail.org --subject "Mail from QR"
 ```
 
+... or as docker container:
+
+```bash
+docker run ghcr.io/shpaker/makeqr wifi --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
+```
+
 # Features
 
 - [x] geo
