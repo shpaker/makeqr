@@ -9,6 +9,7 @@ classifiers=[
     "Operating System :: OS Independent",
     'Topic :: Communications',
 ]
+readme = "readme.md"
 homepage = "https://github.com/shpaker/makeqr"
 repository = "https://github.com/shpaker/makeqr"
 
