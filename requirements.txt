@@ -1,2 +1,0 @@
-fire==0.2.1
-qrcode[pil]==6.1
