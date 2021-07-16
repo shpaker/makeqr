@@ -1,34 +1,39 @@
 # wifi_qrcode
+
 Generate WiFi Access QR Codes
 
 # Installation
 
 ```bash
-pip install -U wifi_qrcode
+pip install makeqr
 ```
 
 # Usage example
 
-```bash
-wifi_qrcode --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
-```
-
-or as python module
+To test that installation was successful, try:
 
 ```bash
-python -m wifi_qrcode wifi --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
-python -m wifi_qrcode mailto --to user@mail.org --subject "Mail from QR"
+makeqr wifi --help
 ```
 
-# Arguments
+Usage from the command line:
 
-## Required
+```bash
+makeqr wifi --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
+```
 
-* `--ssid` Network SSID
+... or as python module:
 
-## Optional
+```bash
+python -m makeqr wifi --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
+python -m makeqr mailto --to user@mail.org --subject "Mail from QR"
+```
 
-* `--auth` Authentication type; can be WEP or WPA, or 'nopass' for no password;
-* `--password` Password, ignored if `--auth` is "nopass";
-* `--hidden` True if the network SSID is hidden;
-* `--output` QR-code file. Can be with PNG or SVG extension.
+# Features
+
+- [x] geo
+- [x] link
+- [x] mailto
+- [x] sms
+- [x] tel
+- [x] wifi
