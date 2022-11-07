@@ -8,7 +8,7 @@ class AuthType(str, Enum):
 
 
 @unique
-class ImageType(str, Enum):
+class ImageFormat(str, Enum):
     SVG = ".svg"
     PNG = ".png"
 

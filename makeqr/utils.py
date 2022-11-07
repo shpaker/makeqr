@@ -1,12 +1,7 @@
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import quote
 
-import qrcode
-from qrcode.image.pil import PilImage
-from qrcode.image.svg import SvgImage
-
-from makeqr.enums import DataScheme, ImageType, WifiMecardParam
+from makeqr.enums import DataScheme, WifiMecardParam
 
 
 def make_mecard_data(
@@ -40,32 +35,3 @@ def make_link_data(
         params_string = "&".join(params_list)
         data = f"{data}{concatenation_char}{params_string}"
     return data
-
-
-def make_image(
-    data: str,
-    file_type: ImageType,
-    **kwargs: Any,
-) -> Union[PilImage, SvgImage]:
-    image_factory = (
-        None if file_type is ImageType.PNG else qrcode.image.svg.SvgImage
-    )
-    qrcode_data = qrcode.QRCode(
-        error_correction=qrcode.constants.ERROR_CORRECT_H,
-        box_size=10,
-        border=0,
-    )
-    qrcode_data.add_data(data)
-    qrcode_data.make(fit=True)
-    return qrcode_data.make_image(image_factory=image_factory, **kwargs)
-
-
-def check_file_name(
-    file_path: Path,
-) -> Tuple[Path, ImageType]:
-    try:
-        file_type = ImageType(file_path.suffix)
-    except KeyError:
-        file_type = ImageType.PNG
-        file_path = Path(f"{file_path}{file_type}")
-    return file_path.resolve(), file_type

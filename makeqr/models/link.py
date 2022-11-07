@@ -2,13 +2,13 @@ from typing import Any, Dict, Optional
 
 from pydantic import AnyUrl
 
-from makeqr.models.base import QrDataBaseModel
+from makeqr.base import QrDataBaseModel
 from makeqr.utils import make_link_data
 
-MECARD_SPECIAL_CHARACTERS: str = r'\;,:"'
 
-
-class LinkModel(QrDataBaseModel):
+class LinkModel(
+    QrDataBaseModel,
+):
     url: AnyUrl
     params: Optional[Dict[str, Any]] = None
 

@@ -3,13 +3,13 @@ from urllib.parse import quote
 
 from pydantic import EmailStr, Field
 
+from makeqr.base import QrDataBaseModel
 from makeqr.enums import DataScheme
-from makeqr.models.base import QrDataBaseModel
-
-MECARD_SPECIAL_CHARACTERS: str = r'\;,:"'
 
 
-class MailToModel(QrDataBaseModel):
+class MailToModel(
+    QrDataBaseModel,
+):
     to: EmailStr
     subject: Optional[str] = Field(None, min_length=1)
     cc: Tuple[EmailStr, ...] = Field(default_factory=tuple)

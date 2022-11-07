@@ -2,14 +2,16 @@ from typing import Optional
 
 from pydantic import Field
 
+from makeqr.base import QrDataBaseModel
 from makeqr.enums import AuthType, DataScheme, WifiMecardParam
-from makeqr.models.base import QrDataBaseModel
 from makeqr.utils import make_mecard_data
 
 MECARD_SPECIAL_CHARACTERS: str = r'\;,:"'
 
 
-class WiFiModel(QrDataBaseModel):
+class WiFiModel(
+    QrDataBaseModel,
+):
     ssid: str = Field(..., min_length=1)
     security: Optional[AuthType] = None
     password: Optional[str] = Field(None, min_length=1)
