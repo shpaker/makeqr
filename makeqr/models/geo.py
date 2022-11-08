@@ -1,3 +1,5 @@
+from pydantic import Field
+
 from makeqr.base import QrDataBaseModel
 from makeqr.enums import DataScheme
 from makeqr.utils import make_link_data
@@ -6,7 +8,7 @@ from makeqr.utils import make_link_data
 class GeoModel(
     QrDataBaseModel,
 ):
-    latitude: float
+    latitude: float = Field(2.0, description='wow')
     longitude: float
 
     @property

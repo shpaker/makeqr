@@ -14,10 +14,10 @@ class MakeQR:
         self,
         data: Union[str, T],
     ) -> None:
-        if issubclass(data, QrDataBaseModel):
+        if issubclass(data.__class__, QrDataBaseModel):
             data = data.qr_data
         self._qr: Optional[QRCode] = None
-        self._data = data
+        self.data = data
 
     @property
     def data(self):
@@ -53,7 +53,7 @@ class MakeQR:
         format=None,  # noqa
         **params,
     ) -> None:
-        with open(path, "rb") as stream:
+        with open(path, "wb") as stream:
             self.pil_image.save(
                 stream,
                 format=format,

@@ -1,6 +1,6 @@
 from typer.testing import CliRunner
 
-from makeqr.cli_app import app
+from makeqr import cli_app
 
 runner = CliRunner()
 

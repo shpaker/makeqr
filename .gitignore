@@ -1,5 +1,7 @@
 *.png
 *.svg
+*.jpg
+*.jpeg
 .idea/
 
 # Byte-compiled / optimized / DLL files
