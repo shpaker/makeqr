@@ -21,7 +21,7 @@ def command_wrapper(
     return CommandInfo(name, callback=_wrapper)
 
 
-@command_wrapper("geo")
+# @command_wrapper("geo")
 def geo_handler(
     latitude: float,
     longitude: float,
