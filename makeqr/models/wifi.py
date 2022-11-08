@@ -12,7 +12,7 @@ MECARD_SPECIAL_CHARACTERS: str = r'\;,:"'
 class WiFiModel(
     QrDataBaseModel,
 ):
-    ssid: str = Field(..., min_length=1)
+    ssid: str = Field(min_length=1)
     security: Optional[AuthType] = None
     password: Optional[str] = Field(None, min_length=1)
     hidden: bool = False

@@ -1,9 +1,9 @@
 from enum import Enum
-from typing import Type, TypeVar, Any
+from typing import Type, TypeVar, Any, Generic
 
 import click
 from pydantic import ValidationError
-from pydantic.fields import Undefined
+from pydantic.fields import Undefined, ModelField
 
 from makeqr import MakeQR
 from makeqr.base import QrDataBaseModel
@@ -20,26 +20,50 @@ QR_MODELS_LIST = (
 
 
 class TypeClickMapping(Enum):
-    STR = click.types.STRING
-    INT = click.types.INT
-    FLOAT = click.types.FLOAT
-    BOOL = click.types.BOOL
+    STR = click.STRING
+    INT = click.INT
+    FLOAT = click.FLOAT
+    BOOL = click.BOOL
+    ENUM = click.Choice
 
 
 class TypePyMapping(Enum):
     INT = int
     FLOAT = float
     BOOL = bool
+    ENUM = Enum
+
+
+def _is_enum(
+    py_type: Type[Any],
+) -> bool:
+    try:
+        return issubclass(py_type, Enum)
+    except TypeError:
+        return False
+
+
+def _is_tuple(
+    py_type: ModelField,
+) -> bool:
+    try:
+        return py_type.outer_type_.__origin__ in [tuple, list]
+    except AttributeError:
+        return False
 
 
 def _py_to_click_types(
-    py_type: Type[Any],
-) -> TypeClickMapping:
+    py_type: ModelField,
+):
+    if _is_enum(py_type.type_):
+        return click.Choice(choices=[entry.value for entry in py_type.type_])
+    if _is_tuple(py_type):
+        return click.Tuple([click.STRING])
     try:
         _type_in_mapping = TypePyMapping(py_type)
     except ValueError:
-        return TypeClickMapping.STR
-    return TypeClickMapping[_type_in_mapping.name]
+        return TypeClickMapping.STR.value
+    return TypeClickMapping[_type_in_mapping.name].value
 
 
 T = TypeVar("T", bound=QrDataBaseModel)
@@ -68,13 +92,13 @@ def _add_qr_model_command(
     options = (
         click.option(
             f'--{name}',
-            type=_py_to_click_types(meta.annotation).value,
-            default=meta.default,
-            required=meta.field_info.default is Undefined,
+            type=_py_to_click_types(model_field),
+            default=model_field.default,
+            required=model_field.required,
             show_default=True,
-            help=meta.field_info.description,
+            help=model_field.field_info.description,
         )
-        for name, meta in reversed(fields.items())
+        for name, model_field in reversed(fields.items())
     )
     for option in options:
         func = option(func)
