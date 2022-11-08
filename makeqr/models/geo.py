@@ -8,7 +8,7 @@ from makeqr.utils import make_link_data
 class GeoModel(
     QrDataBaseModel,
 ):
-    latitude: float = Field(2.0, description='wow')
+    latitude: float
     longitude: float
 
     @property
