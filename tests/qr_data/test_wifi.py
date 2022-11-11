@@ -1,5 +1,5 @@
 from makeqr.constants import AuthType
-from makeqr.models.wifi import QRWiFiModel
+from makeqr.models import QRWiFiModel
 
 
 def test_make_wifi() -> None:

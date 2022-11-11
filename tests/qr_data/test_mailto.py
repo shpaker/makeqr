@@ -1,4 +1,4 @@
-from makeqr.models.mailto import QRMailToModel
+from makeqr.models import QRMailToModel
 
 
 def test_make_mailto() -> None:

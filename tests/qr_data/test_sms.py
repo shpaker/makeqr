@@ -1,4 +1,4 @@
-from makeqr.models.sms import QRSMSModel
+from makeqr.models import QRSMSModel
 
 
 def test_make_tel() -> None:

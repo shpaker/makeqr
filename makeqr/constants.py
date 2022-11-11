@@ -1,6 +1,9 @@
 from enum import Enum, unique
 from typing import Tuple
 
+DEFAULT_LINK_SCHEME = "https"
+MECARD_SPECIAL_CHARACTERS: str = r'\;,:"'
+
 
 class AuthType(str, Enum):
     WPA = "wpa"

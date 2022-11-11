@@ -1,4 +1,4 @@
-from makeqr.models.geo import QRGeoModel
+from makeqr.models import QRGeoModel
 
 
 def test_make_geo() -> None:

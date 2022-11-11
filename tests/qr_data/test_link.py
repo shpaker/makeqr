@@ -1,4 +1,4 @@
-from makeqr.models.link import QRLinkModel
+from makeqr.models import QRLinkModel
 
 LINK = "http://some.url"
 
