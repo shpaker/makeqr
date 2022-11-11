@@ -3,8 +3,7 @@ from typing import Optional, Tuple
 from urllib.parse import quote
 
 from click import types
-from pydantic import AnyUrl, EmailStr, Field, validator
-from pydantic import BaseModel, Extra
+from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field, validator
 
 from makeqr.constants import (
     DEFAULT_LINK_SCHEME,
@@ -16,7 +15,7 @@ from makeqr.constants import (
 from makeqr.utils import make_link_data, make_mecard_data
 
 
-class QrDataBaseModel(
+class QRDataBaseModel(
     ABC,
     BaseModel,
     extra=Extra.forbid,
@@ -29,7 +28,7 @@ class QrDataBaseModel(
 
 
 class QRGeoModel(
-    QrDataBaseModel,
+    QRDataBaseModel,
 ):
     latitude: float = Field(
         alias="lat",
@@ -52,7 +51,7 @@ class QRGeoModel(
 
 
 class QRLinkModel(
-    QrDataBaseModel,
+    QRDataBaseModel,
 ):
     url: AnyUrl = Field(
         alias="u",
@@ -78,7 +77,7 @@ class QRLinkModel(
 
 
 class QRMailToModel(
-    QrDataBaseModel,
+    QRDataBaseModel,
 ):
     to: EmailStr = Field(
         description="Recipient",
@@ -120,7 +119,7 @@ class QRMailToModel(
 
 
 class QRSMSModel(
-    QrDataBaseModel,
+    QRDataBaseModel,
 ):
     recipients: Tuple[str, ...] = Field(
         [],
@@ -143,7 +142,7 @@ class QRSMSModel(
 
 
 class QRTelModel(
-    QrDataBaseModel,
+    QRDataBaseModel,
 ):
     tel: str = Field(
         False,
@@ -160,7 +159,7 @@ class QRTelModel(
 
 
 class QRTextModel(
-    QrDataBaseModel,
+    QRDataBaseModel,
 ):
     text: str = Field(
         alias="t",
@@ -172,7 +171,7 @@ class QRTextModel(
 
 
 class QRWiFiModel(
-    QrDataBaseModel,
+    QRDataBaseModel,
 ):
     ssid: str = Field(
         description="Network SSID",

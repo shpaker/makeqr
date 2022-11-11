@@ -1,5 +1,5 @@
 from typing import TypeVar
 
-from makeqr.models import QrDataBaseModel
+from makeqr.models import QRDataBaseModel
 
-QRDataModel = TypeVar("QRDataModel", bound=QrDataBaseModel)
+QRDataModel = TypeVar("QRDataModel", bound=QRDataBaseModel)

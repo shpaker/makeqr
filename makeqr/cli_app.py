@@ -1,7 +1,8 @@
-from typing import Any, Type
+import sys
+from typing import Any, Type, Dict
 
 import click
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from makeqr import (
     MakeQR,
@@ -24,22 +25,35 @@ _QR_MODELS_LIST = (
     QRTextModel,
     QRWiFiModel,
 )
-from click import types, Context
-from pydantic import BaseModel
 
 
 class FieldExtraClickOptionsModel(BaseModel, arbitrary_types_allowed=True):
-    click_option_type: types.ParamType = types.STRING
+    click_option_type: click.types.ParamType = click.types.STRING
     click_option_multiple: bool = False
+
+
+def make_command_name(
+    model_type: Type[QRDataModel],
+) -> str:
+    command_name = model_type.__name__.lower().split("model")[0]
+    return command_name.lower().split("qr")[1]
+
+
+def echo_qr(
+    qr: MakeQR
+) -> None:
+    for row in qr.matrix:
+        for col in row:
+            click.echo("██" if col is True else '  ', nl=False)
+        click.echo(nl=True)
 
 
 def _add_qr_model_command(
     cli_group: click.Group,
-    model_type: Type[QRDataModel],
+    model_cls: Type[QRDataModel],
 ) -> None:
-    command_name = model_type.__name__.lower().split("model")[0]
-    command_name = command_name.lower().split("qr")[1]
-    fields = model_type.__fields__
+    command_name = make_command_name(model_cls)
+    fields = model_cls.__fields__
     options = []
 
     for name, model_field in reversed(fields.items()):
@@ -63,28 +77,30 @@ def _add_qr_model_command(
         )
 
     def func(
-        ctx: Context,
+        group_params: Dict[str, Any],
         **kwargs: Any,
     ) -> None:
         try:
-            model = model_type(**kwargs)
+            model = model_cls(**kwargs)
         except ValidationError as err:
             click.echo(str(err), color=True, err=True)
-            ctx.exit(1)
-        click.echo(model.dict())
-        qr = MakeQR(model)
-        qr.save("output.jpeg")
+            sys.exit(1)
+        qr = MakeQR(
+            model,
+            box_size=group_params['size'],
+            border=group_params['border'],
+        )
+
+        try:
+            qr.save(group_params['output'])
+        except (ValueError, OSError) as err:
+            click.echo(str(err), color=True, err=True)
+            sys.exit(1)
 
     for option in options:
         func = option(func)
-    command_decorator = cli_group.command(
-        name=command_name,
-        context_settings={
-            "ignore_unknown_options": True,
-            "allow_extra_args": True,
-        },
-    )
-    func = click.pass_context(func)
+    command_decorator = cli_group.command(name=command_name)
+    func = click.pass_obj(func)
     command_decorator(func)
 
 
@@ -95,8 +111,20 @@ def _add_commands(
         _add_qr_model_command(cli_group, model)  # type: ignore
 
 
+@click.group()
+@click.option('--size', '-s', type=click.INT, default=8)
+@click.option('--border', '-b', type=click.INT, default=6)
+@click.option('--output', '-o', type=click.Path(), default='output.png')
+@click.pass_context
+def cli_group(
+    ctx: click.Context,
+    size: int,
+    border: int,
+    output: str,
+) -> None:
+    ctx.obj = {'size': size, 'border': border, 'output': output}
+
+
 def make_app() -> click.Group:
-    group_decorator = click.group()
-    cli_group = group_decorator(lambda: ...)
     _add_commands(cli_group)
     return cli_group

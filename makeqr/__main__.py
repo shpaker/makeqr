@@ -1,7 +1,7 @@
 from makeqr.cli_app import make_app
 
 
-def main():
+def main() -> None:
     app = make_app()
     app()
 
