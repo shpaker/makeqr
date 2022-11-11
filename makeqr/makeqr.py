@@ -49,7 +49,8 @@ class MakeQR:
     def matrix(
         self,
     ) -> List[List[bool]]:
-        return self._qr.get_matrix()
+        matrix: List[List[bool]] = self._qr.get_matrix()
+        return matrix
 
     @property
     def pil_image(

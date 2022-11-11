@@ -1,5 +1,5 @@
 import sys
-from typing import Any, Type, Dict
+from typing import Any, Dict, Type
 
 import click
 from pydantic import BaseModel, ValidationError
@@ -39,17 +39,15 @@ def make_command_name(
     return command_name.lower().split("qr")[1]
 
 
-def echo_qr(
-    qr: MakeQR
-) -> None:
+def echo_qr(qr: MakeQR) -> None:
     for row in qr.matrix:
         for col in row:
-            click.echo("██" if col is True else '  ', nl=False)
+            click.echo("██" if col is True else "  ", nl=False)
         click.echo(nl=True)
 
 
 def _add_qr_model_command(
-    cli_group: click.Group,
+    group: click.Group,
     model_cls: Type[QRDataModel],
 ) -> None:
     command_name = make_command_name(model_cls)
@@ -87,34 +85,34 @@ def _add_qr_model_command(
             sys.exit(1)
         qr = MakeQR(
             model,
-            box_size=group_params['size'],
-            border=group_params['border'],
+            box_size=group_params["size"],
+            border=group_params["border"],
         )
 
         try:
-            qr.save(group_params['output'])
+            qr.save(group_params["output"])
         except (ValueError, OSError) as err:
             click.echo(str(err), color=True, err=True)
             sys.exit(1)
 
     for option in options:
         func = option(func)
-    command_decorator = cli_group.command(name=command_name)
+    command_decorator = group.command(name=command_name)
     func = click.pass_obj(func)
     command_decorator(func)
 
 
 def _add_commands(
-    cli_group: click.Group,
+    group: click.Group,
 ) -> None:
     for model in _QR_MODELS_LIST:
-        _add_qr_model_command(cli_group, model)  # type: ignore
+        _add_qr_model_command(group, model)  # type: ignore
 
 
 @click.group()
-@click.option('--size', '-s', type=click.INT, default=8)
-@click.option('--border', '-b', type=click.INT, default=6)
-@click.option('--output', '-o', type=click.Path(), default='output.png')
+@click.option("--size", "-s", type=click.INT, default=8)
+@click.option("--border", "-b", type=click.INT, default=6)
+@click.option("--output", "-o", type=click.Path(), default="output.png")
 @click.pass_context
 def cli_group(
     ctx: click.Context,
@@ -122,7 +120,7 @@ def cli_group(
     border: int,
     output: str,
 ) -> None:
-    ctx.obj = {'size': size, 'border': border, 'output': output}
+    ctx.obj = {"size": size, "border": border, "output": output}
 
 
 def make_app() -> click.Group:
