@@ -3,23 +3,41 @@ from urllib.parse import quote
 
 from pydantic import EmailStr, Field
 
-from makeqr.base import QrDataBaseModel
-from makeqr.enums import DataScheme
+from makeqr.constants import DataScheme
+from makeqr.qr_data_model import QrDataBaseModel
 
 
-class MailToModel(
+class QRMailToModel(
     QrDataBaseModel,
 ):
-    to: EmailStr
-    subject: Optional[str] = Field(None, min_length=1)
-    cc: Tuple[EmailStr, ...] = Field(default_factory=tuple)
-    bcc: Tuple[EmailStr, ...] = Field(default_factory=tuple)
-    body: Optional[str] = None
+    to: EmailStr = Field(
+        description="Recipient",
+        alias="t",
+    )
+    subject: Optional[str] = Field(
+        None,
+        alias="s",
+    )
+    cc: Tuple[EmailStr, ...] = Field(
+        (),
+        description="Carbon copy",
+        click_option_multiple=True,
+    )
+    bcc: Tuple[EmailStr, ...] = Field(
+        (),
+        description="Blind carbon copy",
+        click_option_multiple=True,
+    )
+    body: Optional[str] = Field(
+        None,
+        description="E-mail body",
+        alias="b",
+    )
 
     @property
     def qr_data(self) -> str:
         data = f"{DataScheme.MAILTO}:{self.to}"
-        args = list()
+        args = []
         if self.subject:
             args.append(f"subject={quote(self.subject)}")
         if self.cc:

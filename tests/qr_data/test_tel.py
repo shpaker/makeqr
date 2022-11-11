@@ -1,7 +1,7 @@
-from makeqr.models.tel import TelModel
+from makeqr.models.tel import QRTelModel
 
 
 def test_make_tel() -> None:
     tel = "+79876543210"
-    data = TelModel(tel=tel)
-    assert data.encode == f"tel:{tel}"
+    data = QRTelModel(tel=tel)
+    assert data.qr_data == f"tel:{tel}"

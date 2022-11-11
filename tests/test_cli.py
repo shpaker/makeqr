@@ -1,8 +1,9 @@
-from typer.testing import CliRunner
+from click.testing import CliRunner
 
-from makeqr import cli_app
+from makeqr.cli_app import make_app
 
 runner = CliRunner()
+app = make_app()
 
 
 def test_unknown():

@@ -1,14 +1,14 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union
 from urllib.parse import quote
 
-from makeqr.enums import DataScheme, WifiMecardParam
+from makeqr.constants import DataScheme, WifiMecardParam
 
 
 def make_mecard_data(
     title: str,
     fields: Dict[WifiMecardParam, str],
 ) -> str:
-    fields_list = list()
+    fields_list = []
     for field, value in fields.items():
         fields_list.append(f"{field.value}:{value}")
     mecard_data = f'{title}:{";".join(fields_list)};;'
@@ -17,13 +17,13 @@ def make_mecard_data(
 
 def make_link_data(
     schema: Optional[DataScheme] = None,
-    link: Optional[Union[List[str], str]] = None,
+    link: Optional[Union[Tuple[str, ...], str]] = None,
     params: Optional[Dict[str, Any]] = None,
 ) -> str:
     if isinstance(link, str):
-        link = [link]
+        link = (link,)
     if not link:
-        link = list()
+        link = ()
     link_str = ",".join(link)
     data = link_str
     if schema:

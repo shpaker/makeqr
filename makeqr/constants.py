@@ -1,15 +1,31 @@
-from enum import Enum
-
-from qrcode import ERROR_CORRECT_H
-
-DEFAULT_OUTPUT: str = "qrcode.png"
+from enum import Enum, unique
+from typing import Tuple
 
 
-class DefaultQRColors(str, Enum):
-    FILL = "black"
-    BACK = "white"
+class AuthType(str, Enum):
+    WPA = "wpa"
+    WPA2 = "wpa2"
+    WEP = "wep"
+
+    @classmethod
+    def get_values(
+        cls,
+    ) -> Tuple[str, ...]:
+        return tuple(auth.value for auth in AuthType)
 
 
-DEFAULT_QR_IMAGE_PARAMS = {
-    "error_correction": ERROR_CORRECT_H,
-}
+@unique
+class WifiMecardParam(str, Enum):
+    HIDDEN = "H"
+    SSID = "S"
+    AUTH = "T"
+    PASSWORD = "P"
+
+
+@unique
+class DataScheme(str, Enum):
+    WIFI = "WIFI"
+    MAILTO = "mailto"
+    TEL = "tel"
+    SMS = "sms"
+    GEO = "geo"

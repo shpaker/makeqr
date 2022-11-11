@@ -58,7 +58,7 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 line_length = 79
-src_paths = ["makeqr", "test"]
+src_paths = ["makeqr", "tests"]
 skip = [".mypy_cache", ".pytest_cache", "venv"]
 
 [tool.pylint.messages_control]
@@ -68,7 +68,7 @@ extend-ignore = "E203,W503"
 [tool.pylint.format]
 max-line-length = "79"
 indent-string = "    "
-good-names = "i, x, y, T, cc, bcc, to"
+good-names = "i, x, y, T, cc, bcc, to, qr"
 
 [tool.pylint.master]
 ignore = "venv,tests"

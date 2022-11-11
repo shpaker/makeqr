@@ -1,33 +1,37 @@
 from pathlib import Path
-from typing import List, Optional, TypeVar, Union
+from typing import Any, List, Union
 
 from PIL.Image import Image
 from qrcode import QRCode
 
-from makeqr.base import QrDataBaseModel
-
-T = TypeVar("T", bound=QrDataBaseModel)
+from makeqr.qr_data_model import QrDataBaseModel
+from makeqr.typing import QRDataModel
 
 
 class MakeQR:
     def __init__(
         self,
-        data: Union[str, T],
+        data: Union[str, QRDataModel],
     ) -> None:
         if issubclass(data.__class__, QrDataBaseModel):
             data = data.qr_data
-        self._qr: Optional[QRCode] = None
+        self._qr: QRCode
         self.data = data
 
     @property
-    def data(self):
+    def data(self) -> QRCode:
         return self._data
 
     @data.setter
-    def data(self, value):
+    def data(
+        self,
+        value: Union[str, QRDataModel],
+    ) -> None:
+        if issubclass(value.__class__, QrDataBaseModel):
+            value = value.qr_data
         self._data = value
         self._qr = QRCode(
-            # todo: config
+            #
         )
         self._qr.add_data(value)
 
@@ -37,7 +41,8 @@ class MakeQR:
     ) -> List[List[bool]]:
         qr = QRCode()
         qr.add_data(self._data)
-        return qr.get_matrix()
+        matrix: List[List[bool]] = qr.get_matrix()
+        return matrix
 
     @property
     def pil_image(
@@ -50,12 +55,10 @@ class MakeQR:
     def save(
         self,
         path: Union[str, Path],
-        format=None,  # noqa
-        **params,
+        **params: Any,
     ) -> None:
         with open(path, "wb") as stream:
             self.pil_image.save(
                 stream,
-                format=format,
                 **params,
             )

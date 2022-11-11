@@ -1,21 +1,41 @@
 from typing import Optional
 
+from click import types
 from pydantic import Field
 
-from makeqr.base import QrDataBaseModel
-from makeqr.enums import AuthType, DataScheme, WifiMecardParam
+from makeqr.constants import AuthType, DataScheme, WifiMecardParam
+from makeqr.qr_data_model import QrDataBaseModel
 from makeqr.utils import make_mecard_data
 
 MECARD_SPECIAL_CHARACTERS: str = r'\;,:"'
 
 
-class WiFiModel(
+class QRWiFiModel(
     QrDataBaseModel,
 ):
-    ssid: str = Field(min_length=1)
-    security: Optional[AuthType] = None
-    password: Optional[str] = Field(None, min_length=1)
-    hidden: bool = False
+    ssid: str = Field(
+        description="Network SSID",
+        alias="id",
+    )
+    security: Optional[AuthType] = Field(
+        None,
+        description="Authentication type",
+        alias="s",
+        click_option_type=types.Choice(
+            AuthType.get_values(),
+            case_sensitive=False,
+        ),
+    )
+    password: Optional[str] = Field(
+        None,
+        alias="p",
+    )
+    hidden: bool = Field(
+        False,
+        description="True if the SSID is hidden",
+        alias="h",
+        click_option_type=types.BOOL,
+    )
 
     @property
     def qr_data(self) -> str:

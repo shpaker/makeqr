@@ -1,15 +1,17 @@
-from makeqr.models.geo import GeoModel
-from makeqr.models.link import LinkModel
-from makeqr.models.mailto import MailToModel
-from makeqr.models.sms import SmsModel
-from makeqr.models.tel import TelModel
-from makeqr.models.wifi import WiFiModel
+from makeqr.models.geo import QRGeoModel
+from makeqr.models.link import QRLinkModel
+from makeqr.models.mailto import QRMailToModel
+from makeqr.models.sms import QRSMSModel
+from makeqr.models.tel import QRTelModel
+from makeqr.models.text import QRTextModel
+from makeqr.models.wifi import QRWiFiModel
 
 __all__ = (
-    "GeoModel",
-    "LinkModel",
-    "MailToModel",
-    "SmsModel",
-    "TelModel",
-    "WiFiModel",
+    "QRGeoModel",
+    "QRLinkModel",
+    "QRMailToModel",
+    "QRSMSModel",
+    "QRTelModel",
+    "QRTextModel",
+    "QRWiFiModel",
 )
