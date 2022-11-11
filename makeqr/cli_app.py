@@ -1,4 +1,3 @@
-import sys
 from typing import Any, Type
 
 import click
@@ -15,7 +14,6 @@ from makeqr import (
     QRTextModel,
     QRWiFiModel,
 )
-from makeqr.cli_app.field_extra import FieldExtraClickOptionsModel
 
 _QR_MODELS_LIST = (
     QRGeoModel,
@@ -26,6 +24,13 @@ _QR_MODELS_LIST = (
     QRTextModel,
     QRWiFiModel,
 )
+from click import types, Context
+from pydantic import BaseModel
+
+
+class FieldExtraClickOptionsModel(BaseModel, arbitrary_types_allowed=True):
+    click_option_type: types.ParamType = types.STRING
+    click_option_multiple: bool = False
 
 
 def _add_qr_model_command(
@@ -46,8 +51,8 @@ def _add_qr_model_command(
         )
         options.append(
             click.option(
-                f"--{name}",
                 f"-{model_field.alias}",
+                f"--{name}",
                 type=click_extras.click_option_type,
                 default=model_field.default,
                 required=model_field.required,
@@ -57,19 +62,18 @@ def _add_qr_model_command(
             )
         )
 
-    def _wrapper(
+    def func(
+        ctx: Context,
         **kwargs: Any,
     ) -> None:
         try:
             model = model_type(**kwargs)
         except ValidationError as err:
-            click.echo(err, color=True)
-            sys.exit(1)
-        click.echo(model.qr_data)
+            click.echo(str(err), color=True, err=True)
+            ctx.exit(1)
+        click.echo(model.dict())
         qr = MakeQR(model)
-        qr.save("test.jpeg")
-
-    func = _wrapper
+        qr.save("output.jpeg")
 
     for option in options:
         func = option(func)
@@ -80,8 +84,8 @@ def _add_qr_model_command(
             "allow_extra_args": True,
         },
     )
-    func = command_decorator(func)
-    click.pass_context(func)
+    func = click.pass_context(func)
+    command_decorator(func)
 
 
 def _add_commands(

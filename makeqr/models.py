@@ -1,8 +1,10 @@
+from abc import ABC, abstractmethod
 from typing import Optional, Tuple
 from urllib.parse import quote
 
 from click import types
 from pydantic import AnyUrl, EmailStr, Field, validator
+from pydantic import BaseModel, Extra
 
 from makeqr.constants import (
     DEFAULT_LINK_SCHEME,
@@ -11,8 +13,19 @@ from makeqr.constants import (
     DataScheme,
     WifiMecardParam,
 )
-from makeqr.qr_data_model import QrDataBaseModel
 from makeqr.utils import make_link_data, make_mecard_data
+
+
+class QrDataBaseModel(
+    ABC,
+    BaseModel,
+    extra=Extra.forbid,
+    allow_population_by_field_name=True,
+):
+    @property
+    @abstractmethod
+    def qr_data(self) -> str:
+        raise NotImplementedError
 
 
 class QRGeoModel(
@@ -150,7 +163,6 @@ class QRTextModel(
     QrDataBaseModel,
 ):
     text: str = Field(
-        False,
         alias="t",
     )
 

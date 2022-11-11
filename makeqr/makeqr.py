@@ -4,7 +4,7 @@ from typing import Any, List, Union
 from PIL.Image import Image
 from qrcode import QRCode
 
-from makeqr.qr_data_model import QrDataBaseModel
+from makeqr.models import QrDataBaseModel
 from makeqr.typing import QRDataModel
 
 
