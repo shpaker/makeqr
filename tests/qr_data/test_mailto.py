@@ -1,15 +1,15 @@
-from makeqr.models.mailto import MailToModel
+from makeqr.models import QRMailToModel
 
 
 def test_make_mailto() -> None:
-    data = MailToModel(
+    data = QRMailToModel(
         to="aaa@aaa.aa",
     )
     assert data.qr_data == "mailto:aaa@aaa.aa"
 
 
 def test_make_mailto_with_subject() -> None:
-    data = MailToModel(
+    data = QRMailToModel(
         to="aaa@aaa.aa",
         subject="test",
     )
@@ -17,7 +17,7 @@ def test_make_mailto_with_subject() -> None:
 
 
 def test_make_mailto_with_subject_and_body() -> None:
-    data = MailToModel(
+    data = QRMailToModel(
         to="aaa@aaa.aa",
         subject="test",
         body="foo",
@@ -26,7 +26,7 @@ def test_make_mailto_with_subject_and_body() -> None:
 
 
 def test_make_mailto_with_subject_and_cc() -> None:
-    data = MailToModel(
+    data = QRMailToModel(
         to="aaa@aaa.aa",
         subject="test",
         cc=["foo@bar.baz", "baz@bar.baz"],

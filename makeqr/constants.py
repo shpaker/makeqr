@@ -1,4 +1,8 @@
 from enum import Enum, unique
+from typing import Tuple
+
+DEFAULT_LINK_SCHEME = "https"
+MECARD_SPECIAL_CHARACTERS: str = r'\;,:"'
 
 
 class AuthType(str, Enum):
@@ -6,11 +10,11 @@ class AuthType(str, Enum):
     WPA2 = "wpa2"
     WEP = "wep"
 
-
-@unique
-class ImageType(str, Enum):
-    SVG = ".svg"
-    PNG = ".png"
+    @classmethod
+    def get_values(
+        cls,
+    ) -> Tuple[str, ...]:
+        return tuple(auth.value for auth in AuthType)
 
 
 @unique

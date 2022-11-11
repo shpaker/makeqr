@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "makeqr"
-version = "3.0.2"
+version = "4.0.0rc1"
 description = "Generate QR cards for any occasion"
 authors = ["Aleksandr Shpak <shpaker@gmail.com>"]
 classifiers=[
@@ -14,22 +14,22 @@ homepage = "https://github.com/shpaker/makeqr"
 repository = "https://github.com/shpaker/makeqr"
 
 [tool.poetry.dependencies]
-python = "^3.7"
-qrcode = {extras = ["pil"], version = "^7.1"}
-typer = "^0.3.2"
+python = "^3.7.2"
+qrcode = {extras = ["pil"], version = "^7.3.1"}
 pydantic = {extras = ["email"], version = "^1.8.2"}
+click = "^8.1.3"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2.4"
-flake8 = "^3.9.2"
-pylint = "^2.9.3"
-mypy = "^0.910"
+pytest = "^7.2.0"
+flake8 = "^5.0.4"
+pylint = "^2.15.5"
+mypy = "^0.990"
 isort = "^5.9.2"
-black = "^21.6b0"
+black = "^22.10.0"
 pre-commit = "^2.13.0"
 
 [tool.poetry.scripts]
-makeqr = 'makeqr.app:main'
+makeqr = 'makeqr.__main__:main'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -58,7 +58,7 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 line_length = 79
-src_paths = ["makeqr", "test"]
+src_paths = ["makeqr", "tests"]
 skip = [".mypy_cache", ".pytest_cache", "venv"]
 
 [tool.pylint.messages_control]
@@ -68,7 +68,7 @@ extend-ignore = "E203,W503"
 [tool.pylint.format]
 max-line-length = "79"
 indent-string = "    "
-good-names = "i, x, y, T, cc, bcc, to"
+good-names = "i, x, y, T, cc, bcc, to, qr"
 
 [tool.pylint.master]
 ignore = "venv,tests"
