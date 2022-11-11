@@ -29,7 +29,7 @@ black = "^22.10.0"
 pre-commit = "^2.13.0"
 
 [tool.poetry.scripts]
-makeqr = 'makeqr.cli_app.main:main'
+makeqr = 'makeqr.__main__:main'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
