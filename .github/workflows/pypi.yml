@@ -23,9 +23,8 @@ jobs:
           echo "##[set-output name=major_ver;]$(TMP_VAR=${GITHUB_REF#refs/*/}; echo ${TMP_VAR%.*.*})"
           echo "##[set-output name=sha;]$(git rev-parse --short "$GITHUB_SHA")"
         id: extract_name_and_version
-      - run: |
-        sed -i 's/0.1.0/'"${{ steps.extract_name_and_version.outputs.ver }}"'/' pyproject.toml
-        head -n 3 pyproject.toml
+      - run: sed -i 's/0.1.0/'"${{ steps.extract_name_and_version.outputs.ver }}"'/' pyproject.toml
+      - run: head -n 3 pyproject.toml
       - run: python -m pip install poetry==1.2.2
       - run: poetry build
       - run: |
