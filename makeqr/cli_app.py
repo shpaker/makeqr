@@ -99,7 +99,10 @@ def _add_qr_model_command(
 
         try:
             qr.save(group_params["output"])
-        except (ValueError, OSError) as err:
+        except ValueError as err:
+            click.echo(str(err), color=True, err=True)
+            qr.save(f"{group_params['output']}.png")
+        except OSError as err:
             click.echo(str(err), color=True, err=True)
             sys.exit(1)
 
