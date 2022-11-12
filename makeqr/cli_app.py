@@ -204,7 +204,7 @@ def _add_commands(
     show_default=True,
 )
 @click.option(
-    "--quit",
+    "--quite",
     "-q",
     is_flag=True,
     default=False,
