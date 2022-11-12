@@ -1,4 +1,4 @@
-# wifi_qrcode
+# MakeQR
 
 Generate WiFi Access QR Codes
 
