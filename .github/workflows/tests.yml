@@ -15,21 +15,14 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
-#          - "3.10"
+          - "3.10"
 #          - "3.11"
     steps:
-      -
-        name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
             python-version: ${{ matrix.python-version }}
-      -
-        uses: actions/checkout@v2
-      -
-        name: Install dependencies
-        run: |
+      - uses: actions/checkout@v2
+      - run: |
           python -m pip install poetry==1.1.7
           poetry install --no-root
-      -
-        name: pytest
-        run: poetry run pytest -vv
+      - run: poetry run pytest -vv
