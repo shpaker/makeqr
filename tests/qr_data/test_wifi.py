@@ -19,7 +19,7 @@ def test_make_wifi_without_wpa_with_password() -> None:
 
 def test_make_wifi_with_wpa_with_password() -> None:
     data = QRWiFiModel(ssid="test", security=AuthType.WPA2, password="secret")
-    assert data.qr_data == "WIFI:S:test;P:secret;T:wpa;;"
+    assert data.qr_data == "WIFI:S:test;P:secret;T:WPA;;"
 
 
 def test_make_wifi_hidden() -> None:
