@@ -1,5 +1,6 @@
 import sys
-from typing import Any, Callable, Dict, List, Type
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Type
 
 import click
 from click.decorators import FC
@@ -41,11 +42,17 @@ def make_command_name(
     return command_name.lower().split("qr")[1]
 
 
-# def echo_qr(qr: MakeQR) -> None:
-#     for row in qr.matrix:
-#         for col in row:
-#             _echo("██" if col is True else "  ", nl=False)
-#         _echo(nl=True)
+def _echo_qr(
+    verbose: bool,
+    qr: MakeQR,
+) -> None:
+    matrix = qr.matrix
+    if verbose:
+        click.echo(click.style("Result".upper(), bold=True))
+    for row in matrix:
+        for col in row:
+            click.echo("██" if col is True else "  ", nl=False)
+        click.echo(nl=True)
 
 
 def _make_click_options_from_model(
@@ -94,12 +101,11 @@ def _make_click_options_from_model(
 
 
 def _echo(
-    group_params: Dict[str, Any],
+    verbose: bool,
     title: str,
     message: str,
     **kwargs: Any,
 ) -> None:
-    verbose = group_params["verbose"]
     if verbose is True:
         click.echo(click.style(title.upper(), bold=True))
         click.echo(f"  {message}", **kwargs)
@@ -116,30 +122,40 @@ def _add_qr_model_command(
         group_params: Dict[str, Any],
         **kwargs: Any,
     ) -> None:
+        verbose = group_params["verbose"]
         try:
             model: QRDataModelType = model_cls(**kwargs)
         except ValidationError as err:
-            _echo(group_params, "error", str(err), color=True, err=True)
+            _echo(verbose, "error", str(err), color=True, err=True)
             sys.exit(1)
-        _echo(group_params, "Data model", model.json())
-        _echo(group_params, "Encoded QR data", model.qr_data)
+        _echo(verbose, "Data model", model.json())
+        _echo(verbose, "Encoded QR data", model.qr_data)
         qr = MakeQR(
             model,
             box_size=group_params["box-size"],
             border=group_params["border"],
             error_correction=group_params["error-correction"],
         )
+        if group_params["print"]:
+            _echo_qr(verbose, qr)
 
         filename = group_params["output"]
+        if filename is None:
+            return
+        filename = Path(filename)
+        is_exist_before = filename.exists()
+
         try:
             qr.save(filename)
         except ValueError:
+            if not is_exist_before:
+                filename.unlink(missing_ok=True)
             filename = f"{filename}.{DEFAULT_IMAGE_FORMAT}"
-            qr.save(filename, format=DEFAULT_IMAGE_FORMAT)
+            qr.save(filename)
         except OSError as err:
-            _echo(group_params, "error", str(err), color=True, err=True)
+            _echo(verbose, "error", str(err), color=True, err=True)
             sys.exit(1)
-        _echo(group_params, "Name of output file", filename)
+        _echo(verbose, "Name of output file", filename)
 
     for option in options:
         func = option(func)
@@ -181,7 +197,7 @@ def _add_commands(
     "--output",
     "-o",
     type=click.Path(),
-    default="output.png",
+    default=None,
     show_default=True,
 )
 @click.option(
@@ -191,14 +207,22 @@ def _add_commands(
     default=False,
     show_default=True,
 )
+@click.option(
+    "--print",
+    "-p",
+    is_flag=True,
+    default=False,
+    show_default=True,
+)
 @click.pass_context
 def cli_group(
     ctx: click.Context,
     box_size: int,
     border: int,
-    output: str,
-    verbose: bool,
     error_correction: str,
+    output: Optional[str],
+    verbose: bool,
+    print: bool,  # pylint: disable=redefined-builtin
 ) -> None:
     ctx.obj = {
         "box-size": box_size,
@@ -206,6 +230,7 @@ def cli_group(
         "output": output,
         "error-correction": ErrorCorrectionLevel(error_correction),
         "verbose": verbose,
+        "print": print,
     }
 
 
