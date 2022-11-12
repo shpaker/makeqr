@@ -27,6 +27,5 @@ jobs:
       - run: head -n 3 pyproject.toml
       - run: python -m pip install poetry==1.2.2
       - run: poetry build
-      - run: |
-        poetry config http-basic.pypi ${{ secrets.PYPI_LOGIN }} ${{ secrets.PYPI_PASS }}
-        poetry publish
+      - run: poetry config http-basic.pypi ${{ secrets.PYPI_LOGIN }} ${{ secrets.PYPI_PASS }}
+      - run: poetry publish
