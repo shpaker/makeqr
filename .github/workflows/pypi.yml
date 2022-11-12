@@ -15,7 +15,7 @@ jobs:
           python-version: "3.9"
       - uses: actions/checkout@v3
       - run: |
-        sed -i 's/0.1.0/'"${CI_COMMIT_REF_NAME}"'/' pyproject.toml
+        sed -i 's/0.1.0/'"${GITHUB_REF#refs/*/}"'/' pyproject.toml
         head -n 6 xml_data_model/__version__.py
       - run: python -m pip install poetry==1.2.2
       - run: poetry build
