@@ -1,7 +1,8 @@
 import sys
-from typing import Any, Dict, Type
+from typing import Any, Callable, Dict, List, Type
 
 import click
+from click.decorators import FC
 from pydantic import BaseModel, ValidationError
 
 from makeqr import (
@@ -46,15 +47,12 @@ def echo_qr(qr: MakeQR) -> None:
         click.echo(nl=True)
 
 
-def _add_qr_model_command(
-    group: click.Group,
+def _make_options_from_model(
     model_cls: Type[QRDataModel],
-) -> None:
-    command_name = make_command_name(model_cls)
-    fields = model_cls.__fields__
+) -> List[Callable[[FC], FC]]:
     options = []
 
-    for name, model_field in reversed(fields.items()):
+    for name, model_field in model_cls.__fields__.items():
         click_extras = FieldExtraClickOptionsModel.parse_obj(
             model_field.field_info.extra
         )
@@ -73,6 +71,16 @@ def _add_qr_model_command(
                 multiple=click_extras.click_option_multiple,
             )
         )
+    options.reverse()
+    return options
+
+
+def _add_qr_model_command(
+    group: click.Group,
+    model_cls: Type[QRDataModel],
+) -> None:
+    command_name = make_command_name(model_cls)
+    options = _make_options_from_model(model_cls)
 
     def func(
         group_params: Dict[str, Any],
