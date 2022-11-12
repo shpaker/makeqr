@@ -161,24 +161,28 @@ def _add_commands(
     "-s",
     type=click.INT,
     default=8,
+    show_default=True,
 )
 @click.option(
     "--border",
     "-b",
     type=click.INT,
     default=1,
+    show_default=True,
 )
 @click.option(
     "--error-correction",
     "-e",
     type=click.Choice(ErrorCorrectionLevel.get_values()),
     default=ErrorCorrectionLevel.MEDIUM.value,
+    show_default=True,
 )
 @click.option(
     "--output",
     "-o",
     type=click.Path(),
     default="output.png",
+    show_default=True,
 )
 @click.option(
     "--verbose",
