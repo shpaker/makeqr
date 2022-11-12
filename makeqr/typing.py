@@ -1,5 +1,8 @@
 from typing import TypeVar
 
-from makeqr.models import QRDataBaseModel
+from makeqr.models import _QRDataBaseModel
 
-QRDataModel = TypeVar("QRDataModel", bound=QRDataBaseModel)
+QRDataModelType = TypeVar(  # pylint: disable=invalid-name
+    "QRDataModelType",
+    bound=_QRDataBaseModel,
+)

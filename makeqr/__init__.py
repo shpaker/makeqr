@@ -8,11 +8,11 @@ from makeqr.models import (
     QRTextModel,
     QRWiFiModel,
 )
-from makeqr.typing import QRDataModel
+from makeqr.typing import QRDataModelType
 
 __all__ = (
     "MakeQR",
-    "QRDataModel",
+    "QRDataModelType",
     "QRGeoModel",
     "QRLinkModel",
     "QRMailToModel",

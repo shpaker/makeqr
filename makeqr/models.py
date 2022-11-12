@@ -15,7 +15,7 @@ from makeqr.constants import (
 from makeqr.utils import make_link_data, make_mecard_data
 
 
-class QRDataBaseModel(
+class _QRDataBaseModel(
     ABC,
     BaseModel,
     extra=Extra.forbid,
@@ -28,7 +28,7 @@ class QRDataBaseModel(
 
 
 class QRGeoModel(
-    QRDataBaseModel,
+    _QRDataBaseModel,
 ):
     latitude: float = Field(
         alias="lat",
@@ -51,7 +51,7 @@ class QRGeoModel(
 
 
 class QRLinkModel(
-    QRDataBaseModel,
+    _QRDataBaseModel,
 ):
     url: AnyUrl = Field(
         alias="u",
@@ -77,7 +77,7 @@ class QRLinkModel(
 
 
 class QRMailToModel(
-    QRDataBaseModel,
+    _QRDataBaseModel,
 ):
     to: EmailStr = Field(
         description="Recipient",
@@ -119,7 +119,7 @@ class QRMailToModel(
 
 
 class QRSMSModel(
-    QRDataBaseModel,
+    _QRDataBaseModel,
 ):
     recipients: Tuple[str, ...] = Field(
         [],
@@ -142,7 +142,7 @@ class QRSMSModel(
 
 
 class QRTelModel(
-    QRDataBaseModel,
+    _QRDataBaseModel,
 ):
     tel: str = Field(
         False,
@@ -159,7 +159,7 @@ class QRTelModel(
 
 
 class QRTextModel(
-    QRDataBaseModel,
+    _QRDataBaseModel,
 ):
     text: str = Field(
         alias="t",
@@ -171,7 +171,7 @@ class QRTextModel(
 
 
 class QRWiFiModel(
-    QRDataBaseModel,
+    _QRDataBaseModel,
 ):
     ssid: str = Field(
         description="Network SSID",
