@@ -105,7 +105,7 @@ class QRMailToModel(
 
     @property
     def qr_data(self) -> str:
-        data = f"{DataScheme.MAILTO}:{self.to}"
+        data = f"{DataScheme.MAILTO.value}:{self.to}"
         args = []
         if self.subject:
             args.append(f"subject={quote(self.subject)}")
@@ -216,6 +216,6 @@ class QRWiFiModel(
             fields[WifiMecardParam.PASSWORD] = self.password
             fields[WifiMecardParam.AUTH] = self.security
         return make_mecard_data(
-            title=DataScheme.WIFI,
+            title=DataScheme.WIFI.value,
             fields=fields,
         )
