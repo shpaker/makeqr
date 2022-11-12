@@ -188,7 +188,7 @@ class QRWiFiModel(
     )
     password: Optional[str] = Field(
         None,
-        alias="pass",
+        alias="p",
     )
     hidden: bool = Field(
         False,

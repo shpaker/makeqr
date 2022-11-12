@@ -35,7 +35,7 @@ class FieldExtraClickOptionsModel(BaseModel, arbitrary_types_allowed=True):
     click_option_multiple: bool = False
 
 
-def make_command_name(
+def _make_command_name(
     model_type: Type[QRDataModelType],
 ) -> str:
     command_name = model_type.__name__.lower().split("model")[0]
@@ -115,7 +115,7 @@ def _add_qr_model_command(
     group: click.Group,
     model_cls: Type[QRDataModelType],
 ) -> None:
-    command_name = make_command_name(model_cls)
+    command_name = _make_command_name(model_cls)
     options = _make_click_options_from_model(model_cls)
 
     def func(
@@ -225,7 +225,7 @@ def cli_group(
     error_correction: str,
     output: Optional[str],
     quite: bool,
-    print: bool,  # pylint: disable=redefined-builtin
+    print: bool,  # noqa, pylint: disable=redefined-builtin
 ) -> None:
     ctx.obj = {
         "box-size": box_size,

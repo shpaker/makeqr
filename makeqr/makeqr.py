@@ -1,4 +1,5 @@
 from enum import Enum
+from io import BytesIO
 from pathlib import Path
 from typing import Any, List, Union
 
@@ -11,7 +12,7 @@ from qrcode import (
     QRCode,
 )
 
-from makeqr.constants import ErrorCorrectionLevel
+from makeqr.constants import DEFAULT_IMAGE_FORMAT, ErrorCorrectionLevel
 from makeqr.models import _QRDataBaseModel
 from makeqr.typing import QRDataModelType
 
@@ -67,6 +68,19 @@ class MakeQR:
     ) -> List[List[bool]]:
         matrix: List[List[bool]] = self._qr.get_matrix()
         return matrix
+
+    def make_image_data(
+        self,
+        image_format: str = DEFAULT_IMAGE_FORMAT,
+        **params: Any,
+    ) -> bytes:
+        buffer = BytesIO()
+        self.pil_image.save(
+            buffer,
+            format=image_format,
+            **params,
+        )
+        return buffer.getvalue()
 
     @property
     def pil_image(
