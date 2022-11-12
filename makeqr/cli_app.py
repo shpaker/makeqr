@@ -149,7 +149,10 @@ def _add_qr_model_command(
             qr.save(filename)
         except ValueError:
             if not is_exist_before:
-                filename.unlink(missing_ok=True)
+                try:
+                    filename.unlink()
+                except FileNotFoundError:
+                    pass
             filename = f"{filename}.{DEFAULT_IMAGE_FORMAT}"
             qr.save(filename)
         except OSError as err:
