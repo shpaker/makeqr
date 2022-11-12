@@ -204,8 +204,8 @@ def _add_commands(
     show_default=True,
 )
 @click.option(
-    "--verbose",
-    "-v",
+    "--quite",
+    "-q",
     is_flag=True,
     default=False,
     show_default=True,
@@ -224,7 +224,7 @@ def cli_group(
     border: int,
     error_correction: str,
     output: Optional[str],
-    verbose: bool,
+    quite: bool,
     print: bool,  # pylint: disable=redefined-builtin
 ) -> None:
     ctx.obj = {
@@ -232,7 +232,7 @@ def cli_group(
         "border": border,
         "output": output,
         "error-correction": ErrorCorrectionLevel(error_correction),
-        "verbose": verbose,
+        "verbose": not quite,
         "print": print,
     }
 
