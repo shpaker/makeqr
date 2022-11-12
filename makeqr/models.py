@@ -188,7 +188,7 @@ class QRWiFiModel(
     )
     password: Optional[str] = Field(
         None,
-        alias="p",
+        alias="pass",
     )
     hidden: bool = Field(
         False,
@@ -214,7 +214,7 @@ class QRWiFiModel(
             fields[WifiMecardParam.HIDDEN] = "true"
         if self.security and self.password:
             fields[WifiMecardParam.PASSWORD] = self.password
-            fields[WifiMecardParam.AUTH] = self.security.value
+            fields[WifiMecardParam.AUTH] = self.security.name
         return make_mecard_data(
             title=DataScheme.WIFI.value,
             fields=fields,
