@@ -10,37 +10,82 @@ pip install makeqr -U
 
 # Usage example
 
-To test that installation was successful, try:
+## To test that installation was successful, try:
 
 ```bash
 makeqr --help
+```
+
+or
+
+```
 makeqr wifi --help
 ```
 
-Usage from the command line:
+## Command line command
+
+### Command
 
 ```bash
-makeqr -o 123.jpg wifi --ssid ABC --password Tfsjfklasdjfklasdest -s wpa2
+makeqr -p wifi --ssid ABC --password Tfsjfklasdjfklasdest -s wpa2
 ```
 
-... or as python module:
+### Output
+
+```
+DATA MODEL
+  {"ssid": "ABC", "security": "wpa2", "password": "Tfsjfklasdjfklasdest", "hidden": false}
+ENCODED QR DATA
+  WIFI:S:ABC;P:Tfsjfklasdjfklasdest;T:WPA;;
+RESULT
+
+  ██████████████        ████  ██████  ██████  ██████████████
+  ██          ██    ██  ██████████        ██  ██          ██
+  ██  ██████  ██  ██████  ██  ██      ████    ██  ██████  ██
+  ██  ██████  ██  ██  ██      ██  ████    ██  ██  ██████  ██
+  ██  ██████  ██  ██    ██    ██    ████████  ██  ██████  ██
+  ██          ██  ██  ██████    ██  ████  ██  ██          ██
+  ██████████████  ██  ██  ██  ██  ██  ██  ██  ██████████████
+                  ██  ██████    ████  ██
+  ██  ██████████      ██      ████████        ██████████
+        ██  ██  ██  ██    ██    ████  ██████  ██  ██  ████
+  ██    ██  ████████    ████    ██████      ████  ████
+  ██████    ██  ██  ██  ██    ██      ██  ██████  ██    ████
+  ██          ██  ████  ██  ██    ████  ██      ████████
+        ██  ██    ██████  ██████    ████████    ████  ████
+    ██  ████  ████  ██████  ██  ██  ████  ██    ██    ██
+    ████  ████          ██    ██████    ██  ██      ██
+    ██████    ██  ████████████  ██████  ██      ██  ██  ████
+  ██      ████        ██    ████  ██████████████  ██    ██
+  ██      ██  ████    ██  ████  ████            ██  ████
+  ██  ██████        ██████    ██      ██████████  ██      ██
+  ██  ████  ██████      ████    ██████    ██████████████
+                  ██  ██    ██    ██  ██  ██      ██  ██
+  ██████████████      ██  ██████████  ██████  ██  ██  ██
+  ██          ██  ████  ██  ██  ████    ████      ████
+  ██  ██████  ██  ██  ██      ████  ██    ██████████    ████
+  ██  ██████  ██  ██    ████      ██      ██      ██    ████
+  ██  ██████  ██  ██    ██    ████  ████  ██  ████████  ██
+  ██          ██    ██  ██    ██████      ████      ██  ██
+  ██████████████  ██  ██        ██  ██  ██    ██  ██
+```
+
+## Docker container
 
 ```bash
-python -m makeqr wifi --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
-python -m makeqr mailto --to user@mail.org --subject "Mail from QR"
+docker run ghcr.io/shpaker/makeqr:4.0.1 -p link https://t.me/shpaker
+
 ```
 
-... or as docker container:
+## As python module
 
 ```bash
-docker run ghcr.io/shpaker/makeqr wifi --ssid MYWIRELESSNETWORK --auth WPA --password SECRET
+from makeqr import MakeQR, QRMailToModel
+
+model = QRMailToModel(
+  to='foo@bar.baz',
+  subject='Awesome subject!',
+)
+qr = MakeQR(model)
+data: bytes = qr.make_image_data()
 ```
-
-# Features
-
-- [x] geo
-- [x] link
-- [x] mailto
-- [x] sms
-- [x] tel
-- [x] wifi
