@@ -79,7 +79,7 @@ docker run ghcr.io/shpaker/makeqr:4.0.1 -p link https://t.me/shpaker
 
 ## As python module
 
-```bash
+```python
 from makeqr import MakeQR, QRMailToModel
 
 model = QRMailToModel(
