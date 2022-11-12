@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v3
       - run: |
         sed -i 's/0.1.0/'"${GITHUB_REF#refs/*/}"'/' pyproject.toml
-        head -n 6 xml_data_model/__version__.py
+        head -n 3 pyproject.toml
       - run: python -m pip install poetry==1.2.2
       - run: poetry build
       - run: |
