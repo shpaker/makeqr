@@ -9,7 +9,9 @@ from makeqr.models import (
     QRWiFiModel,
 )
 from makeqr.typing import QRDataModelType
+from makeqr.version import VERSION
 
+__version__ = VERSION
 __all__ = (
     "MakeQR",
     "QRDataModelType",
@@ -20,4 +22,5 @@ __all__ = (
     "QRTelModel",
     "QRTextModel",
     "QRWiFiModel",
+    "VERSION",
 )

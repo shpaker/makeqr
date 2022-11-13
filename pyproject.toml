@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "makeqr"
+name = "MakeQR"
 version = "0.1.0"
 description = "Generate QR cards for any occasion"
 authors = ["Aleksandr Shpak <shpaker@gmail.com>"]

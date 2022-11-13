@@ -7,6 +7,7 @@ from click.decorators import FC
 from pydantic import BaseModel, ValidationError
 
 from makeqr import (
+    VERSION,
     MakeQR,
     QRDataModelType,
     QRGeoModel,
@@ -28,6 +29,15 @@ _QR_MODELS_LIST = (
     QRTextModel,
     QRWiFiModel,
 )
+_CAPTION = (
+    " __   __  _______  ___   _  _______  _______  ______\n"
+    "|  |_|  ||   _   ||   | | ||       ||       ||    _ |\n"
+    "|       ||  |_|  ||   |_| ||    ___||   _   ||   | ||\n"
+    "|       ||       ||      _||   |___ |  | |  ||   |_||_\n"
+    "|       ||       ||     |_ |    ___||  |_|  ||    __  |\n"
+    "| ||_|| ||   _   ||    _  ||   |___ |      | |   |  | |\n"
+    "|_|   |_||__| |__||___| |_||_______||____||_||___|  |_|"
+)
 
 
 class FieldExtraClickOptionsModel(BaseModel, arbitrary_types_allowed=True):
@@ -46,6 +56,7 @@ def _echo_qr(
     verbose: bool,
     qr: MakeQR,
 ) -> None:
+    click.echo()
     matrix = qr.matrix
     if verbose:
         click.echo(click.style("Result".upper(), bold=True))
@@ -107,8 +118,9 @@ def _echo(
     **kwargs: Any,
 ) -> None:
     if verbose is True:
+        click.echo()
         click.echo(click.style(title.upper(), bold=True))
-        click.echo(f"  {message}", **kwargs)
+        click.echo(f"{message}", **kwargs)
 
 
 def _add_qr_model_command(
@@ -123,13 +135,15 @@ def _add_qr_model_command(
         **kwargs: Any,
     ) -> None:
         verbose = group_params["verbose"]
+        if verbose:
+            click.echo(_CAPTION)
         try:
             model: QRDataModelType = model_cls(**kwargs)
         except ValidationError as err:
             _echo(verbose, "error", str(err), color=True, err=True)
             sys.exit(1)
         _echo(verbose, "Data model", model.json())
-        _echo(verbose, "Encoded QR data", model.qr_data)
+        _echo(verbose, "QR string", model.qr_data)
         qr = MakeQR(
             model,
             box_size=group_params["box-size"],
@@ -174,6 +188,17 @@ def _add_commands(
         _add_qr_model_command(group, model)  # type: ignore
 
 
+def _echo_version(
+    ctx: click.Context,
+    param: bool,  # noqa, pylint: disable=unused-argument
+    value: str,
+) -> None:
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(VERSION)
+    ctx.exit()
+
+
 @click.group()
 @click.option(
     "--box-size",
@@ -208,14 +233,21 @@ def _add_commands(
     "-q",
     is_flag=True,
     default=False,
-    show_default=True,
 )
 @click.option(
     "--print",
     "-p",
     is_flag=True,
     default=False,
-    show_default=True,
+)
+@click.option(
+    "--version",
+    "-V",
+    is_flag=True,
+    default=False,
+    expose_value=False,
+    is_eager=True,
+    callback=_echo_version,
 )
 @click.pass_context
 def cli_group(
