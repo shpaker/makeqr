@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Type
 import click
 from click.decorators import FC
 from pydantic import BaseModel, ValidationError
+from pydantic.fields import ModelField
 
 from makeqr import (
     VERSION,
@@ -40,7 +41,10 @@ _CAPTION = (
 )
 
 
-class FieldExtraClickOptionsModel(BaseModel, arbitrary_types_allowed=True):
+class FieldExtraClickOptionsModel(
+    BaseModel,
+    arbitrary_types_allowed=True,
+):
     click_option_type: click.types.ParamType = click.types.STRING
     click_option_multiple: bool = False
 
@@ -50,6 +54,22 @@ def _make_command_name(
 ) -> str:
     command_name = model_type.__name__.lower().split("model")[0]
     return command_name.lower().split("qr")[1]
+
+
+def _get_from_model_argument_name(
+    model_cls: Type[QRDataModelType],
+) -> Any:
+    argument_name = None
+    for name, model_field in model_cls.__fields__.items():
+        click_extras = FieldExtraClickOptionsModel.parse_obj(
+            model_field.field_info.extra
+        )
+        model_field: ModelField
+        if model_field.required is True and click_extras.click_option_multiple is False:
+            if argument_name is not None:
+                return None
+            argument_name = name
+    return argument_name
 
 
 def _echo_qr(
@@ -66,36 +86,50 @@ def _echo_qr(
         click.echo(nl=True)
 
 
+def _make_click_argument(
+    name: str,
+    model_field: ModelField,
+) -> Callable:
+    click_extras = FieldExtraClickOptionsModel.parse_obj(
+        model_field.field_info.extra
+    )
+    return click.argument(
+        name,
+        type=click_extras.click_option_type,
+        default=model_field.default,
+        required=model_field.required,
+    )
+
+
 def _make_click_options_from_model(
     model_cls: Type[QRDataModelType],
 ) -> List[Callable[[FC], FC]]:
-    options = []
-    fields = model_cls.__fields__
-
-    if len(fields) == 1:
-        name = list(fields.keys())[0]
-        model_field = fields[name]
-        click_extras = FieldExtraClickOptionsModel.parse_obj(
-            model_field.field_info.extra
-        )
-        options.append(
-            click.argument(
-                name,
-                type=click_extras.click_option_type,
-                default=model_field.default,
-                required=model_field.required,
-            )
-        )
-        return options
+    params = []
+    argument_name = _get_from_model_argument_name(model_cls)
 
     for name, model_field in model_cls.__fields__.items():
+
+        if argument_name == name:
+            click_extras = FieldExtraClickOptionsModel.parse_obj(
+                model_field.field_info.extra
+            )
+            params.append(
+                click.argument(
+                    name,
+                    type=click_extras.click_option_type,
+                    default=model_field.default,
+                    required=model_field.required,
+                )
+            )
+            continue
+
         click_extras = FieldExtraClickOptionsModel.parse_obj(
             model_field.field_info.extra
         )
         option_help = (
             model_field.field_info.description or model_field.name.capitalize()
         )
-        options.append(
+        params.append(
             click.option(
                 f"-{model_field.alias}",
                 f"--{name}",
@@ -107,8 +141,8 @@ def _make_click_options_from_model(
                 multiple=click_extras.click_option_multiple,
             )
         )
-    options.reverse()
-    return options
+    params.reverse()
+    return params
 
 
 def _echo(

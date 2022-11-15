@@ -122,7 +122,6 @@ class QRSMSModel(
     _QRDataBaseModel,
 ):
     recipients: Tuple[str, ...] = Field(
-        [],
         alias="r",
         click_option_multiple=True,
     )
@@ -145,7 +144,6 @@ class QRTelModel(
     _QRDataBaseModel,
 ):
     tel: str = Field(
-        False,
         description="Telephone number",
         alias="t",
     )
