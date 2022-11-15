@@ -37,7 +37,7 @@ _CAPTION = (
     "|       ||       ||      _||   |___ |  | |  ||   |_||_\n"
     "|       ||       ||     |_ |    ___||  |_|  ||    __  |\n"
     "| ||_|| ||   _   ||    _  ||   |___ |      | |   |  | |\n"
-    "|_|   |_||__| |__||___| |_||_______||____||_||___|  |_|"
+    "|_|   |_||__| |__||___| |_||_______||____||_||___|  |_|\n"
 )
 
 
@@ -73,14 +73,9 @@ def _get_from_model_argument_name(
 
 
 def _echo_qr(
-    verbose: bool,
     qr: MakeQR,
 ) -> None:
-    click.echo()
-    matrix = qr.matrix
-    if verbose:
-        click.echo(click.style("Result".upper(), bold=True))
-    for row in matrix:
+    for row in qr.matrix:
         for col in row:
             click.echo("██" if col is True else "  ", nl=False)
         click.echo(nl=True)
@@ -146,15 +141,36 @@ def _make_click_options_from_model(
 
 
 def _echo(
-    verbose: bool,
-    title: str,
     message: str,
-    **kwargs: Any,
+    verbose: bool = True,
+    **kwargs,
 ) -> None:
     if verbose is True:
-        click.echo()
-        click.echo(click.style(title.upper(), bold=True))
-        click.echo(f"{message}", **kwargs)
+        click.echo(message, **kwargs)
+
+
+def _save_file(
+    qr: MakeQR,
+    filename: Path,
+    verbose: bool,
+) -> None:
+    filename = Path(filename)
+    is_exist_before = filename.exists()
+
+    try:
+        qr.save(filename)
+    except ValueError:
+        if not is_exist_before:
+            try:
+                filename.unlink()
+            except FileNotFoundError:
+                pass
+        filename = f"{filename}.{DEFAULT_IMAGE_FORMAT}"
+        qr.save(filename)
+    except OSError as err:
+        _echo(f"ERROR:\n{str(err)}", err=True)
+        sys.exit(1)
+    _echo(f"Output: {filename}", verbose=verbose)
 
 
 def _add_qr_model_command(
@@ -169,44 +185,26 @@ def _add_qr_model_command(
         **kwargs: Any,
     ) -> None:
         verbose = group_params["verbose"]
-        if verbose:
-            click.echo(_CAPTION)
+        _echo(click.style(_CAPTION, bold=True), verbose=verbose)
         try:
             model: QRDataModelType = model_cls(**kwargs)
         except ValidationError as err:
-            _echo(verbose, "error", str(err), color=True, err=True)
+            _echo(f"ERROR:\n{str(err)}", err=True)
             sys.exit(1)
-        _echo(verbose, "Data model", model.json())
-        _echo(verbose, "QR string", model.qr_data)
+        _echo(f"Model: {model.json()}", verbose=verbose)
+        _echo(f"Encoded: {model.qr_data}", verbose=verbose)
         qr = MakeQR(
             model,
             box_size=group_params["box-size"],
             border=group_params["border"],
             error_correction=group_params["error-correction"],
         )
-        if group_params["print"]:
-            _echo_qr(verbose, qr)
-
         filename = group_params["output"]
-        if filename is None:
-            return
-        filename = Path(filename)
-        is_exist_before = filename.exists()
+        if filename is not None:
+            _save_file(qr, filename, verbose)
 
-        try:
-            qr.save(filename)
-        except ValueError:
-            if not is_exist_before:
-                try:
-                    filename.unlink()
-                except FileNotFoundError:
-                    pass
-            filename = f"{filename}.{DEFAULT_IMAGE_FORMAT}"
-            qr.save(filename)
-        except OSError as err:
-            _echo(verbose, "error", str(err), color=True, err=True)
-            sys.exit(1)
-        _echo(verbose, "Name of output file", filename)
+        if not group_params["quite"]:
+            _echo_qr(qr)
 
     for option in options:
         func = option(func)
@@ -263,6 +261,12 @@ def _echo_version(
     show_default=True,
 )
 @click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    default=False,
+)
+@click.option(
     "--quite",
     "-q",
     is_flag=True,
@@ -290,6 +294,7 @@ def cli_group(
     border: int,
     error_correction: str,
     output: Optional[str],
+    verbose: bool,
     quite: bool,
     print: bool,  # noqa, pylint: disable=redefined-builtin
 ) -> None:
@@ -298,7 +303,8 @@ def cli_group(
         "border": border,
         "output": output,
         "error-correction": ErrorCorrectionLevel(error_correction),
-        "verbose": not quite,
+        "verbose": verbose,
+        "quite": quite,
         "print": print,
     }
 
