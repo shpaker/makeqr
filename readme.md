@@ -1,5 +1,8 @@
 # MakeQR
 
+[![PyPI](https://img.shields.io/pypi/v/makeqr.svg)](https://pypi.python.org/pypi/makeqr)
+[![PyPI](https://img.shields.io/pypi/dm/makeqr.svg)](https://pypi.python.org/pypi/makeqr)
+
 Generate WiFi Access QR Codes
 
 # Installation
