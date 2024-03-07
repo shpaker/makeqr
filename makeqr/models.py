@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple
+from typing import Optional
 from urllib.parse import quote
 
 from click import types
-from pydantic import AnyUrl, BaseModel, EmailStr, Extra, Field, validator
+from pydantic import AnyUrl, BaseModel, ConfigDict, EmailStr, Extra, Field, field_validator
 
 from makeqr.constants import (
     DEFAULT_LINK_SCHEME,
@@ -18,9 +18,12 @@ from makeqr.utils import make_link_data, make_mecard_data
 class _QRDataBaseModel(
     ABC,
     BaseModel,
-    extra=Extra.forbid,
-    allow_population_by_field_name=True,
 ):
+    model_config = ConfigDict(
+        extra=Extra.forbid,
+        populate_by_name=True,
+    )
+
     @property
     @abstractmethod
     def qr_data(self) -> str:
@@ -32,11 +35,11 @@ class QRGeoModel(
 ):
     latitude: float = Field(
         alias="lat",
-        click_option_type=types.FLOAT,
+        click_option_type=types.FLOAT,  # type: ignore
     )
     longitude: float = Field(
         alias="long",
-        click_option_type=types.FLOAT,
+        click_option_type=types.FLOAT,  # type: ignore
     )
 
     @property
@@ -56,17 +59,17 @@ class QRLinkModel(
     url: AnyUrl = Field(
         alias="u",
         description="URL",
-        click_type=types.STRING,
+        click_type=types.STRING,  # type: ignore
     )
 
     @property
     def qr_data(self) -> str:
         return make_link_data(
-            link=self.url,
+            link=str(self.url),
         )
 
     @classmethod
-    @validator("url", pre=True)
+    @field_validator("url", mode="before")
     def url_validator(
         cls,
         value: str,
@@ -87,15 +90,15 @@ class QRMailToModel(
         None,
         alias="s",
     )
-    cc: Tuple[EmailStr, ...] = Field(
+    cc: tuple[EmailStr, ...] = Field(
         (),
         description="Carbon copy",
-        click_option_multiple=True,
+        click_option_multiple=True,  # type: ignore
     )
-    bcc: Tuple[EmailStr, ...] = Field(
+    bcc: tuple[EmailStr, ...] = Field(
         (),
         description="Blind carbon copy",
-        click_option_multiple=True,
+        click_option_multiple=True,  # type: ignore
     )
     body: Optional[str] = Field(
         None,
@@ -121,9 +124,9 @@ class QRMailToModel(
 class QRSMSModel(
     _QRDataBaseModel,
 ):
-    recipients: Tuple[str, ...] = Field(
+    recipients: tuple[str, ...] = Field(
         alias="r",
-        click_option_multiple=True,
+        click_option_multiple=True,  # type: ignore
     )
     body: Optional[str] = Field(
         None,
@@ -179,7 +182,7 @@ class QRWiFiModel(
         None,
         description="Authentication type",
         alias="s",
-        click_option_type=types.Choice(
+        click_option_type=types.Choice(  # type: ignore
             AuthType.get_values(),
             case_sensitive=False,
         ),
@@ -192,7 +195,7 @@ class QRWiFiModel(
         False,
         description="True if the SSID is hidden",
         alias="h",
-        click_option_type=types.BOOL,
+        click_option_type=types.BOOL,  # type: ignore
     )
 
     @property
@@ -202,9 +205,7 @@ class QRWiFiModel(
         for spec_char in MECARD_SPECIAL_CHARACTERS:
             self.ssid = self.ssid.replace(spec_char, f"\\{spec_char}")
             if self.password:
-                self.password = self.password.replace(
-                    spec_char, f"\\{spec_char}"
-                )
+                self.password = self.password.replace(spec_char, f"\\{spec_char}")
         fields = {
             WifiMecardParam.SSID: self.ssid,
         }

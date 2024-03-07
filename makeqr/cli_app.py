@@ -1,11 +1,12 @@
+import contextlib
 import sys
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Any, Callable, Optional
 
 import click
 from click.decorators import FC
-from pydantic import BaseModel, ValidationError
-from pydantic.fields import ModelField
+from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic_core import PydanticUndefined
 
 from makeqr import (
     VERSION,
@@ -43,29 +44,29 @@ _CAPTION = (
 
 class FieldExtraClickOptionsModel(
     BaseModel,
-    arbitrary_types_allowed=True,
 ):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
     click_option_type: click.types.ParamType = click.types.STRING
     click_option_multiple: bool = False
 
 
 def _make_command_name(
-    model_type: Type[QRDataModelType],
+    model_type: type[QRDataModelType],
 ) -> str:
     command_name = model_type.__name__.lower().split("model")[0]
     return command_name.lower().split("qr")[1]
 
 
 def _get_from_model_argument_name(
-    model_cls: Type[QRDataModelType],
+    model_cls: type[QRDataModelType],
 ) -> Any:
     argument_name = None
-    for name, model_field in model_cls.__fields__.items():
-        click_extras = FieldExtraClickOptionsModel.parse_obj(
-            model_field.field_info.extra
-        )
-        model_field: ModelField
-        if model_field.required is True and click_extras.click_option_multiple is False:
+    for name, model_field in model_cls.model_fields.items():
+        extra = model_field.json_schema_extra or {}
+        click_extras = FieldExtraClickOptionsModel.parse_obj(extra)
+        if model_field.is_required() is True and click_extras.click_option_multiple is False:
             if argument_name is not None:
                 return None
             argument_name = name
@@ -81,61 +82,41 @@ def _echo_qr(
         click.echo(nl=True)
 
 
-def _make_click_argument(
-    name: str,
-    model_field: ModelField,
-) -> Callable:
-    click_extras = FieldExtraClickOptionsModel.parse_obj(
-        model_field.field_info.extra
-    )
-    return click.argument(
-        name,
-        type=click_extras.click_option_type,
-        default=model_field.default,
-        required=model_field.required,
-    )
-
-
 def _make_click_options_from_model(
-    model_cls: Type[QRDataModelType],
-) -> List[Callable[[FC], FC]]:
+    model_cls: type[QRDataModelType],
+) -> list[Callable[[FC], FC]]:
     params = []
     argument_name = _get_from_model_argument_name(model_cls)
 
-    for name, model_field in model_cls.__fields__.items():
-
+    for name, model_field in model_cls.model_fields.items():
         if argument_name == name:
-            click_extras = FieldExtraClickOptionsModel.parse_obj(
-                model_field.field_info.extra
-            )
+            extra = model_field.json_schema_extra or {}
+            click_extras = FieldExtraClickOptionsModel.parse_obj(extra)
             params.append(
                 click.argument(
                     name,
                     type=click_extras.click_option_type,
                     default=model_field.default,
-                    required=model_field.required,
+                    required=model_field.is_required(),
                 )
             )
             continue
-
-        click_extras = FieldExtraClickOptionsModel.parse_obj(
-            model_field.field_info.extra
+        extra = model_field.json_schema_extra or {}
+        click_extras = FieldExtraClickOptionsModel.parse_obj(extra)
+        option_help = model_field.description or name.capitalize()
+        option = click.option(
+            f"-{model_field.alias}",
+            f"--{name}",
+            type=click_extras.click_option_type,
+            default=model_field.default
+            if model_field.default is not None and model_field.default is not PydanticUndefined
+            else None,
+            required=model_field.is_required(),
+            show_default=True,
+            help=option_help,
+            multiple=click_extras.click_option_multiple,
         )
-        option_help = (
-            model_field.field_info.description or model_field.name.capitalize()
-        )
-        params.append(
-            click.option(
-                f"-{model_field.alias}",
-                f"--{name}",
-                type=click_extras.click_option_type,
-                default=model_field.default,
-                required=model_field.required,
-                show_default=True,
-                help=option_help,
-                multiple=click_extras.click_option_multiple,
-            )
-        )
+        params.append(option)
     params.reverse()
     return params
 
@@ -143,7 +124,7 @@ def _make_click_options_from_model(
 def _echo(
     message: str,
     verbose: bool = True,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     if verbose is True:
         click.echo(message, **kwargs)
@@ -161,27 +142,25 @@ def _save_file(
         qr.save(filename)
     except ValueError:
         if not is_exist_before:
-            try:
+            with contextlib.suppress(FileNotFoundError):
                 filename.unlink()
-            except FileNotFoundError:
-                pass
-        filename = f"{filename}.{DEFAULT_IMAGE_FORMAT}"
+        filename = Path(f"{filename}.{DEFAULT_IMAGE_FORMAT}")
         qr.save(filename)
     except OSError as err:
-        _echo(f"ERROR:\n{str(err)}", err=True)
+        _echo(f"ERROR:\n{err!s}", err=True)
         sys.exit(1)
     _echo(f"Output: {filename}", verbose=verbose)
 
 
 def _add_qr_model_command(
     group: click.Group,
-    model_cls: Type[QRDataModelType],
+    model_cls: type[QRDataModelType],
 ) -> None:
     command_name = _make_command_name(model_cls)
     options = _make_click_options_from_model(model_cls)
 
     def func(
-        group_params: Dict[str, Any],
+        group_params: dict[str, Any],
         **kwargs: Any,
     ) -> None:
         verbose = group_params["verbose"]
@@ -189,7 +168,7 @@ def _add_qr_model_command(
         try:
             model: QRDataModelType = model_cls(**kwargs)
         except ValidationError as err:
-            _echo(f"ERROR:\n{str(err)}", err=True)
+            _echo(f"ERROR:\n{err!s}", err=True)
             sys.exit(1)
         _echo(f"Model: {model.json()}", verbose=verbose)
         _echo(f"Encoded: {model.qr_data}", verbose=verbose)
@@ -209,7 +188,7 @@ def _add_qr_model_command(
     for option in options:
         func = option(func)
     command_decorator = group.command(name=command_name)
-    func = click.pass_obj(func)
+    func = click.pass_obj(func)   # type: ignore
     command_decorator(func)
 
 
@@ -222,7 +201,7 @@ def _add_commands(
 
 def _echo_version(
     ctx: click.Context,
-    param: bool,  # noqa, pylint: disable=unused-argument
+    param: bool,
     value: str,
 ) -> None:
     if not value or ctx.resilient_parsing:

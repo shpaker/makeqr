@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Tuple
 
 DEFAULT_LINK_SCHEME = "https"
 DEFAULT_IMAGE_FORMAT = "png"
@@ -14,7 +13,7 @@ class AuthType(str, Enum):
     @classmethod
     def get_values(
         cls,
-    ) -> Tuple[str, ...]:
+    ) -> tuple[str, ...]:
         return tuple(auth.value for auth in cls)
 
 
@@ -42,5 +41,5 @@ class ErrorCorrectionLevel(str, Enum):
     @classmethod
     def get_values(
         cls,
-    ) -> Tuple[str, ...]:
+    ) -> tuple[str, ...]:
         return tuple(auth.value for auth in cls)

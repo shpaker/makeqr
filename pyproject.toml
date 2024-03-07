@@ -7,26 +7,9 @@ classifiers=[
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    'Topic :: Communications',
 ]
 readme = "README.md"
-homepage = "https://github.com/shpaker/makeqr"
 repository = "https://github.com/shpaker/makeqr"
-
-[tool.poetry.dependencies]
-python = "^3.7.2"
-qrcode = {extras = ["pil"], version = "^7.3.1"}
-pydantic = {extras = ["email"], version = "^1.8.2"}
-click = "^8.1.3"
-
-[tool.poetry.dev-dependencies]
-pytest = "^7.2.0"
-flake8 = "^5.0.4"
-pylint = "^2.15.5"
-mypy = "^0.990"
-isort = "^5.9.2"
-black = "^22.10.0"
-pre-commit = "^2.13.0"
 
 [tool.poetry.scripts]
 makeqr = 'makeqr.__main__:main'
@@ -35,42 +18,97 @@ makeqr = 'makeqr.__main__:main'
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 79
-verbose = 1
-color = true
-exclude = '''
-(
-  /(
-      \.eggs
-    | \.git
-    | \.mypy_cache
-    | \.pytest_cache
-    | \.venv
-  )/
-)
-'''
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0.0"
+click = ">=8.1"
+pydantic = {extras = ["email"], version = ">=2.0"}
+qrcode = {extras = ["pil"], version = ">=7.0"}
 
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-ensure_newline_before_comments = true
-line_length = 79
-src_paths = ["makeqr", "tests"]
-skip = [".mypy_cache", ".pytest_cache", "venv"]
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.8"
+pytest = "^8.0"
+ruff = "^0.3"
 
-[tool.pylint.messages_control]
-disable = "missing-docstring,logging-fstring-interpolation,too-few-public-methods,too-many-arguments,duplicate-code"
-extend-ignore = "E203,W503"
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+exclude = [
+  ".venv",
+]
+lint.ignore = [
+  "PLR0913",  # Too many arguments to function call
+]
+lint.flake8-tidy-imports.ban-relative-imports = "all"
+lint.mccabe.max-complexity = 20
+lint.select = [
+  "F", # Pyflakes
+  # "E/W", # pycodestyle
+  "C90", # mccabe
+   "I", # isort
+  # "N", # pep8-naming
+  # "D", # pydocstyle
+  "UP", # pyupgrade
+  "YTT", # flake8-2020
+  # "ANN", # flake8-annotations
+  # "ASYNC", # flake8-async
+  # "TRIO", # flake8-trio
+  # "S", # flake8-bandit
+  # "BLE", # flake8-blind-except
+  # "FBT", # flake8-boolean-trap
+  "B", # flake8-bugbear
+  # "A", # flake8-builtins
+  # "COM", # flake8-commas
+  # "CPY", # flake8-copyright
+  "C4", # flake8-comprehensions
+  # "DTZ", # flake8-datetimez
+  "T10", # flake8-debugger
+  # "DJ", # flake8-django
+  # "EM", # flake8-errmsg
+  "EXE", # flake8-executable
+  # "FA", # flake8-future-annotations
+  "ISC", # flake8-implicit-str-concat
+  # "ICN", # flake8-import-conventions
+  "G", # flake8-logging-format
+  "INP", # flake8-no-pep420
+  # "PIE", # flake8-pie
+  "T20", # flake8-print
+  # "PYI", # flake8-pyi
+  # "PT", # flake8-pytest-style
+  # "Q", # flake8-quotes
+  "RSE", # flake8-raise
+  "RET", # flake8-return
+  "SLF", # flake8-self
+  # "SLOT", # flake8-slots
+  "SIM", # flake8-simplify
+  "TID", # flake8-tidy-imports
+  # "TCH", # flake8-type-checking
+  # "INT", # flake8-gettext
+  # "ARG", # flake8-unused-arguments
+  "PTH", # flake8-use-pathlib
+  # "TD", # flake8-todos
+  # "FIX", # flake8-fixme
+  "ERA", # eradicate
+  # "PD", # pandas-vet
+  # "PGH", # pygrep-hooks
+  "PL", # Pylint
+  # "TRY", # tryceratops
+  # "FLY", # flynt
+  # "NPY", # NumPy-specific rules
+  # "AIR", # Airflow
+  # "PERF", # Perflint
+  # "FURB", # refurb
+  # "LOG", # flake8-logging
+  "RUF", # Ruff-specific rules
+]
 
-[tool.pylint.format]
-max-line-length = "79"
-indent-string = "    "
-good-names = "i, x, y, T, cc, bcc, to, qr"
+[tool.mypy]
+python_version = 3.9
+plugins = [
+  "pydantic.mypy"
+]
 
-[tool.pylint.master]
-ignore = "venv,tests"
-indent-string = "    "
-extension-pkg-whitelist = "pydantic"
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+

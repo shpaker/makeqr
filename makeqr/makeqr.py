@@ -1,7 +1,7 @@
 from enum import Enum
 from io import BytesIO
 from pathlib import Path
-from typing import Any, List, Union
+from typing import Any, Union
 
 from PIL.Image import Image
 from qrcode import (
@@ -65,8 +65,8 @@ class MakeQR:
     @property
     def matrix(
         self,
-    ) -> List[List[bool]]:
-        matrix: List[List[bool]] = self._qr.get_matrix()
+    ) -> list[list[bool]]:
+        matrix: list[list[bool]] = self._qr.get_matrix()
         return matrix
 
     def make_image_data(
@@ -94,7 +94,9 @@ class MakeQR:
         path: Union[str, Path],
         **params: Any,
     ) -> None:
-        with open(path, "wb") as stream:
+        if isinstance(path, str):
+            path = Path(path)
+        with path.open("wb") as stream:
             self.pil_image.save(
                 stream,
                 **params,
