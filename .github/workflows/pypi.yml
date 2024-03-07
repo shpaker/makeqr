@@ -25,7 +25,7 @@ jobs:
         id: extract_name_and_version
       - run: sed -i 's/0.1.0/'"${{ steps.extract_name_and_version.outputs.ver }}"'/' pyproject.toml
       - run: sed -i 's/0.1.0/'"${{ steps.extract_name_and_version.outputs.ver }}"'/' makeqr/version.py
-      - run: python -m pip install poetry==1.2.2
+      - run: python -m pip install poetry~=1.8.0
       - run: poetry build
-      - run: poetry config http-basic.pypi ${{ secrets.PYPI_LOGIN }} ${{ secrets.PYPI_PASS }}
+      - run: poetry config http-basic.pypi __token__ ${{ secrets.PYPI_PASS }}
       - run: poetry publish
