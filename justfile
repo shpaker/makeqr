@@ -3,7 +3,7 @@
 SOURCE_DIR := "makeqr"
 TESTS_DIR := "tests"
 
-lint: ruff mypy
+lint: mypy ruff
 
 mypy:
   poetry run python -m mypy --pretty --package {{ SOURCE_DIR }}

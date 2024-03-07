@@ -3,7 +3,7 @@ from typing import Optional
 from urllib.parse import quote
 
 from click import types
-from pydantic import AnyUrl, BaseModel, ConfigDict, EmailStr, Extra, Field, field_validator
+from pydantic import AnyUrl, BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from makeqr.constants import (
     DEFAULT_LINK_SCHEME,
@@ -20,7 +20,7 @@ class _QRDataBaseModel(
     BaseModel,
 ):
     model_config = ConfigDict(
-        extra=Extra.forbid,
+        extra='forbid',
         populate_by_name=True,
     )
 
@@ -35,11 +35,14 @@ class QRGeoModel(
 ):
     latitude: float = Field(
         alias="lat",
-        click_option_type=types.FLOAT,  # type: ignore
+        json_schema_extra={
+            'click_option_type': types.FLOAT,
+        },
     )
     longitude: float = Field(
         alias="long",
-        click_option_type=types.FLOAT,  # type: ignore
+        json_schema_extra={
+        'click_option_type':types.FLOAT,}
     )
 
     @property
@@ -59,7 +62,7 @@ class QRLinkModel(
     url: AnyUrl = Field(
         alias="u",
         description="URL",
-        click_type=types.STRING,  # type: ignore
+        json_schema_extra={'click_type':types.STRING,  },
     )
 
     @property
@@ -93,12 +96,18 @@ class QRMailToModel(
     cc: tuple[EmailStr, ...] = Field(
         (),
         description="Carbon copy",
-        click_option_multiple=True,  # type: ignore
+        json_schema_extra={
+            'click_option_multiple':True,
+        },
+
     )
     bcc: tuple[EmailStr, ...] = Field(
         (),
         description="Blind carbon copy",
-        click_option_multiple=True,  # type: ignore
+        json_schema_extra={
+            'click_option_multiple':True,
+        },
+
     )
     body: Optional[str] = Field(
         None,
@@ -126,7 +135,10 @@ class QRSMSModel(
 ):
     recipients: tuple[str, ...] = Field(
         alias="r",
-        click_option_multiple=True,  # type: ignore
+        json_schema_extra={
+            'click_option_multiple':True
+        },
+
     )
     body: Optional[str] = Field(
         None,
@@ -182,10 +194,12 @@ class QRWiFiModel(
         None,
         description="Authentication type",
         alias="s",
-        click_option_type=types.Choice(  # type: ignore
-            AuthType.get_values(),
-            case_sensitive=False,
-        ),
+        json_schema_extra={
+            'click_option_type':types.Choice(  # type: ignore
+        AuthType.get_values(),
+        case_sensitive=False,
+    )
+        },
     )
     password: Optional[str] = Field(
         None,
@@ -195,7 +209,10 @@ class QRWiFiModel(
         False,
         description="True if the SSID is hidden",
         alias="h",
-        click_option_type=types.BOOL,  # type: ignore
+        json_schema_extra={
+            'click_option_type':types.BOOL,
+        },
+
     )
 
     @property

@@ -4,13 +4,13 @@ from pathlib import Path
 from typing import Any, Union
 
 from PIL.Image import Image
-from qrcode import (
+from qrcode.constants import (  # type: ignore
     ERROR_CORRECT_H,
     ERROR_CORRECT_L,
     ERROR_CORRECT_M,
     ERROR_CORRECT_Q,
-    QRCode,
 )
+from qrcode.main import QRCode  # type: ignore
 
 from makeqr.constants import DEFAULT_IMAGE_FORMAT, ErrorCorrectionLevel
 from makeqr.models import _QRDataBaseModel

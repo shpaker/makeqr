@@ -28,6 +28,7 @@ qrcode = {extras = ["pil"], version = ">=7.0"}
 mypy = "^1.8"
 pytest = "^8.0"
 ruff = "^0.3"
+types-pillow = "^10.2.0.20240213"
 
 [tool.ruff]
 target-version = "py39"

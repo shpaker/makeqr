@@ -65,7 +65,7 @@ def _get_from_model_argument_name(
     argument_name = None
     for name, model_field in model_cls.model_fields.items():
         extra = model_field.json_schema_extra or {}
-        click_extras = FieldExtraClickOptionsModel.parse_obj(extra)
+        click_extras = FieldExtraClickOptionsModel.model_validate(extra)
         if model_field.is_required() is True and click_extras.click_option_multiple is False:
             if argument_name is not None:
                 return None
@@ -91,7 +91,7 @@ def _make_click_options_from_model(
     for name, model_field in model_cls.model_fields.items():
         if argument_name == name:
             extra = model_field.json_schema_extra or {}
-            click_extras = FieldExtraClickOptionsModel.parse_obj(extra)
+            click_extras = FieldExtraClickOptionsModel.model_validate(extra)
             params.append(
                 click.argument(
                     name,
@@ -102,7 +102,7 @@ def _make_click_options_from_model(
             )
             continue
         extra = model_field.json_schema_extra or {}
-        click_extras = FieldExtraClickOptionsModel.parse_obj(extra)
+        click_extras = FieldExtraClickOptionsModel.model_validate(extra)
         option_help = model_field.description or name.capitalize()
         option = click.option(
             f"-{model_field.alias}",
@@ -170,7 +170,7 @@ def _add_qr_model_command(
         except ValidationError as err:
             _echo(f"ERROR:\n{err!s}", err=True)
             sys.exit(1)
-        _echo(f"Model: {model.json()}", verbose=verbose)
+        _echo(f"Model: {model.model_dump_json()}", verbose=verbose)
         _echo(f"Encoded: {model.qr_data}", verbose=verbose)
         qr = MakeQR(
             model,
@@ -188,7 +188,7 @@ def _add_qr_model_command(
     for option in options:
         func = option(func)
     command_decorator = group.command(name=command_name)
-    func = click.pass_obj(func)   # type: ignore
+    func = click.pass_obj(func)  # type: ignore
     command_decorator(func)
 
 
