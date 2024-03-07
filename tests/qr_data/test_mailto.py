@@ -31,7 +31,4 @@ def test_make_mailto_with_subject_and_cc() -> None:
         subject="test",
         cc=["foo@bar.baz", "baz@bar.baz"],
     )
-    assert (
-        data.qr_data
-        == "mailto:aaa@aaa.aa?subject=test&cc=foo%40bar.baz%2Cbaz%40bar.baz"
-    )
+    assert data.qr_data == "mailto:aaa@aaa.aa?subject=test&cc=foo%40bar.baz%2Cbaz%40bar.baz"
