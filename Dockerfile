@@ -1,7 +1,6 @@
 FROM python:3.7-slim as base-image
-ARG POETRY_VERSION=1.1.7
 WORKDIR /service
-RUN pip install "poetry==$POETRY_VERSION"
+RUN pip install "poetry~=1.8.0"
 ADD pyproject.toml poetry.lock README.md ./
 ADD makeqr makeqr
 RUN poetry build
