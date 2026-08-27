@@ -16,7 +16,7 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.0.1
       - name: Check the tag matches the packaged version
         run: |
           tag="${GITHUB_REF_NAME#v}"
