@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Four new commands: `vcard` (a vCard 3.0 contact), `mecard` (a MeCard
+  contact), `event` (a calendar event) and `otp` (a TOTP/HOTP provisioning
+  key). The OTP secret is a `SecretStr` and is masked in verbose output, like
+  the WiFi password.
+- Long option names spell underscores as dashes: a `first_name` field becomes
+  `--first-name`.
+- `make_mecard_data` accepts any `StrEnum` mapping, not only WiFi parameters.
+
 ## [5.0.0]
 
 ### Fixed

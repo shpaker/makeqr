@@ -1,4 +1,6 @@
-from makeqr.constants import DataScheme, WifiMecardParam
+from enum import StrEnum
+
+from makeqr.constants import DataScheme, MeCardParam, WifiMecardParam
 from makeqr.utils import make_link_data, make_mecard_data
 
 
@@ -25,5 +27,10 @@ def test_make_link_data_uses_ampersand_when_query_present() -> None:
 
 
 def test_make_mecard_data() -> None:
-    fields = {WifiMecardParam.SSID: "net", WifiMecardParam.PASSWORD: "pw"}
+    fields: dict[StrEnum, str] = {WifiMecardParam.SSID: "net", WifiMecardParam.PASSWORD: "pw"}
     assert make_mecard_data(title="WIFI", fields=fields) == "WIFI:S:net;P:pw;;"
+
+
+def test_make_mecard_data_accepts_mecard_params() -> None:
+    fields: dict[StrEnum, str] = {MeCardParam.NAME: "Doe,John", MeCardParam.TEL: "+123"}
+    assert make_mecard_data(title="MECARD", fields=fields) == "MECARD:N:Doe,John;TEL:+123;;"

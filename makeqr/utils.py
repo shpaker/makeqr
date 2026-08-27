@@ -1,12 +1,14 @@
+from collections.abc import Mapping
+from enum import StrEnum
 from typing import Any
 from urllib.parse import quote
 
-from makeqr.constants import DataScheme, WifiMecardParam
+from makeqr.constants import DataScheme
 
 
 def make_mecard_data(
     title: str,
-    fields: dict[WifiMecardParam, str],
+    fields: Mapping[StrEnum, str],
 ) -> str:
     fields_list = [f"{field.value}:{value}" for field, value in fields.items()]
     return f"{title}:{';'.join(fields_list)};;"

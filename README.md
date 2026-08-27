@@ -6,8 +6,9 @@
 [![Test](https://github.com/shpaker/makeqr/actions/workflows/tests.yml/badge.svg)](https://github.com/shpaker/makeqr/actions/workflows/tests.yml)
 [![License](https://img.shields.io/pypi/l/makeqr.svg)](https://github.com/shpaker/makeqr/blob/main/LICENSE)
 
-Generate QR codes for links, WiFi networks, geo points, e-mail, SMS and plain
-text — from the command line or from Python.
+Generate QR codes for links, WiFi networks, contacts, calendar events,
+one-time-password keys, geo points, e-mail, SMS and plain text — from the
+command line or from Python.
 
 ## Installation
 
@@ -38,6 +39,10 @@ uvx makeqr --help
 | `sms`    | A pre-filled SMS       | `makeqr sms -r +79876543210 -b 'on my way'`           |
 | `tel`    | A phone number         | `makeqr tel +79876543210`                             |
 | `text`   | Arbitrary text         | `makeqr text 'hello world'`                           |
+| `vcard`  | A vCard 3.0 contact    | `makeqr vcard -f John -t +79876543210 Doe`            |
+| `mecard` | A MeCard contact       | `makeqr mecard -f John -t +79876543210 Doe`           |
+| `event`  | A calendar event       | `makeqr event -s Standup -st 2026-09-01T12:00`        |
+| `otp`    | A TOTP/HOTP key        | `makeqr otp -l alice@example.com -s BASE32SECRET`     |
 
 The scheme may be omitted from a link — `makeqr link example.com` encodes
 `https://example.com`.

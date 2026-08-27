@@ -4,12 +4,16 @@ from makeqr.makeqr import MakeQR
 from makeqr.models import (
     QRDataModel,
     QRDataModelType,
+    QREventModel,
     QRGeoModel,
     QRLinkModel,
     QRMailToModel,
+    QRMeCardModel,
+    QROtpModel,
     QRSMSModel,
     QRTelModel,
     QRTextModel,
+    QRVCardModel,
     QRWiFiModel,
 )
 
@@ -26,12 +30,16 @@ __all__ = (
     "MakeQR",
     "QRDataModel",
     "QRDataModelType",
+    "QREventModel",
     "QRGeoModel",
     "QRLinkModel",
     "QRMailToModel",
+    "QRMeCardModel",
+    "QROtpModel",
     "QRSMSModel",
     "QRTelModel",
     "QRTextModel",
+    "QRVCardModel",
     "QRWiFiModel",
     "__version__",
 )
