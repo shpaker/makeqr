@@ -1,6 +1,6 @@
 #!/usr/bin/env just --justfile
 
-SOURCE_DIR := "src"
+SOURCE_DIR := "makeqr"
 TESTS_DIR := "tests"
 
 # List available recipes

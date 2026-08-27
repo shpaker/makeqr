@@ -3,7 +3,7 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from makeqr import __version__
-from makeqr.cli_app import make_app
+from makeqr.cli import make_app
 
 runner = CliRunner()
 app = make_app()

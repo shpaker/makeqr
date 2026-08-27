@@ -1,3 +1,9 @@
+"""Command line interface.
+
+The data models know nothing about click: every command, argument and option
+below is derived from the model's own pydantic fields.
+"""
+
 import types as pytypes
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -10,12 +16,10 @@ from pydantic import SecretStr, ValidationError
 from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined
 
-from makeqr import (
-    QRDataModel,
-    __version__,
-)
+from makeqr import __version__
 from makeqr.constants import DEFAULT_IMAGE_FORMAT, ErrorCorrectionLevel
 from makeqr.makeqr import MakeQR
+from makeqr.models import QRDataModel
 
 #: A click decorator factory such as ``click.option(...)``.
 _Decorator = Callable[[Any], Any]
@@ -33,12 +37,19 @@ _CAPTION = (
 
 @dataclass(frozen=True)
 class GroupOptions:
+    """Global options, resolved once and passed to the chosen command."""
+
     box_size: int
     border: int
     error_correction: ErrorCorrectionLevel
     output: str | None
     verbose: bool
     quiet: bool
+
+
+# --------------------------------------------------------------------------- #
+# Model reflection: fields -> click parameters
+# --------------------------------------------------------------------------- #
 
 
 @dataclass(frozen=True)
@@ -48,17 +59,6 @@ class _ParamSpec:
     param_type: click.types.ParamType
     multiple: bool
     is_flag: bool
-
-
-def _qr_models() -> tuple[type[QRDataModel], ...]:
-    return tuple(sorted(QRDataModel.__subclasses__(), key=lambda model: model.__name__))
-
-
-def _make_command_name(
-    model_type: type[QRDataModel],
-) -> str:
-    command_name = model_type.__name__.lower().split("model")[0]
-    return command_name.lower().split("qr")[1]
 
 
 def _unwrap_optional(annotation: Any) -> Any:
@@ -120,7 +120,7 @@ def _field_default(
     return default.value if isinstance(default, Enum) else default
 
 
-def _make_click_options_from_model(
+def _make_click_params_from_model(
     model_cls: type[QRDataModel],
 ) -> list[_Decorator]:
     params: list[_Decorator] = []
@@ -164,6 +164,11 @@ def _make_click_options_from_model(
     return params
 
 
+# --------------------------------------------------------------------------- #
+# Output
+# --------------------------------------------------------------------------- #
+
+
 def _echo(
     message: str,
     verbose: bool = True,
@@ -178,6 +183,22 @@ def _echo_qr(
 ) -> None:
     for row in qr.matrix:
         click.echo("".join("██" if col else "  " for col in row))
+
+
+def _redact(
+    model: QRDataModel,
+) -> str:
+    """Payload with secret values masked, for the verbose log.
+
+    The mask is substituted before the payload is built, so it survives whatever
+    escaping the model applies to the real value.
+    """
+    masked = {
+        name: SecretStr("***") for name in type(model).model_fields if isinstance(getattr(model, name, None), SecretStr)
+    }
+    if not masked:
+        return model.qr_data
+    return model.model_copy(update=masked).qr_data
 
 
 def _save_file(
@@ -201,12 +222,29 @@ def _save_file(
     _echo(f"Output: {path}", verbose=verbose)
 
 
+# --------------------------------------------------------------------------- #
+# Commands
+# --------------------------------------------------------------------------- #
+
+
+def _qr_models() -> tuple[type[QRDataModel], ...]:
+    """Every concrete data model, in a stable order."""
+    return tuple(sorted(QRDataModel.__subclasses__(), key=lambda model: model.__name__))
+
+
+def _make_command_name(
+    model_type: type[QRDataModel],
+) -> str:
+    command_name = model_type.__name__.lower().split("model")[0]
+    return command_name.lower().split("qr")[1]
+
+
 def _add_qr_model_command(
     group: click.Group,
     model_cls: type[QRDataModel],
 ) -> None:
     command_name = _make_command_name(model_cls)
-    options = _make_click_options_from_model(model_cls)
+    params = _make_click_params_from_model(model_cls)
 
     def func(
         group_options: GroupOptions,
@@ -234,25 +272,9 @@ def _add_qr_model_command(
 
     func.__doc__ = f"Encode {command_name} data."
     command: Any = func
-    for option in options:
-        command = option(command)
+    for param in params:
+        command = param(command)
     group.command(name=command_name)(click.pass_obj(command))
-
-
-def _redact(
-    model: QRDataModel,
-) -> str:
-    """Payload with secret values masked, for the verbose log.
-
-    The mask is substituted before the payload is built, so it survives whatever
-    escaping the model applies to the real value.
-    """
-    masked = {
-        name: SecretStr("***") for name in type(model).model_fields if isinstance(getattr(model, name, None), SecretStr)
-    }
-    if not masked:
-        return model.qr_data
-    return model.model_copy(update=masked).qr_data
 
 
 def _add_commands(
@@ -260,6 +282,11 @@ def _add_commands(
 ) -> None:
     for model in _qr_models():
         _add_qr_model_command(group, model)
+
+
+# --------------------------------------------------------------------------- #
+# Application
+# --------------------------------------------------------------------------- #
 
 
 def _echo_version(
@@ -358,5 +385,11 @@ def cli_group(
 
 
 def make_app() -> click.Group:
+    """Build the command line application."""
     _add_commands(cli_group)
     return cli_group
+
+
+def main() -> None:
+    """Entry point for the ``makeqr`` script."""
+    make_app()()

@@ -37,11 +37,15 @@ Changelog = "https://github.com/shpaker/makeqr/blob/main/CHANGELOG.md"
 Issues = "https://github.com/shpaker/makeqr/issues"
 
 [project.scripts]
-makeqr = "makeqr.__main__:main"
+makeqr = "makeqr.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.9,<0.12"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# Flat layout: the package sits at the repository root.
+module-root = ""
 
 [dependency-groups]
 dev = [
@@ -67,7 +71,7 @@ exclude_also = [
 ]
 
 [tool.ty.src]
-include = ["src", "tests"]
+include = ["makeqr", "tests"]
 
 [tool.ruff]
 target-version = "py311"

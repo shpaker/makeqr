@@ -47,6 +47,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Commands are discovered from `QRDataModel` subclasses, and click option types
   are inferred from field annotations, so the models no longer import click.
 - Packaging moved to uv and PEP 621; the version is read from package metadata.
+- The command line lives in `makeqr.cli` (was `makeqr.cli_app`), and importing
+  `makeqr` no longer pulls in click.
 - The Docker image is built on Python 3.13, runs as a non-root user and is
   published for arm64 as well.
 
