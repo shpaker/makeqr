@@ -1,9 +1,11 @@
 .DS_Store
-*.png
-*.svg
-*.jpg
-*.jpeg
 .idea/
+
+# QR codes generated while poking at the CLI from the repo root
+/*.png
+/*.svg
+/*.jpg
+/*.jpeg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -134,3 +136,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# uv
+.venv/
+uv-cache/
+
+# tooling caches
+.ruff_cache/
+.ty_cache/
