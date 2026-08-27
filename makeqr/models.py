@@ -1,9 +1,17 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import TypeVar
 from urllib.parse import quote
 
-from click import types
-from pydantic import AnyUrl, BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import (
+    AnyUrl,
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    SecretStr,
+    field_validator,
+    model_validator,
+)
 
 from makeqr.constants import (
     DEFAULT_LINK_SCHEME,
@@ -15,12 +23,18 @@ from makeqr.constants import (
 from makeqr.utils import make_link_data, make_mecard_data
 
 
-class _QRDataBaseModel(
+class QRDataModel(
     ABC,
     BaseModel,
 ):
+    """Base class for every payload a QR code can carry.
+
+    Subclasses describe their fields with pydantic and turn themselves into a
+    payload string via :attr:`qr_data`, which must be free of side effects.
+    """
+
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
 
@@ -30,25 +44,28 @@ class _QRDataBaseModel(
         raise NotImplementedError
 
 
+QRDataModelType = TypeVar(
+    "QRDataModelType",
+    bound=QRDataModel,
+)
+
+
 class QRGeoModel(
-    _QRDataBaseModel,
+    QRDataModel,
 ):
     latitude: float = Field(
         alias="lat",
-        json_schema_extra={
-            'click_option_type': types.FLOAT,
-        },
+        description="Latitude in decimal degrees",
     )
     longitude: float = Field(
         alias="long",
-        json_schema_extra={
-        'click_option_type':types.FLOAT,}
+        description="Longitude in decimal degrees",
     )
 
     @property
     def qr_data(self) -> str:
         return make_link_data(
-            schema=DataScheme.GEO,
+            scheme=DataScheme.GEO,
             link=(
                 str(self.latitude),
                 str(self.longitude),
@@ -57,13 +74,22 @@ class QRGeoModel(
 
 
 class QRLinkModel(
-    _QRDataBaseModel,
+    QRDataModel,
 ):
     url: AnyUrl = Field(
         alias="u",
-        description="URL",
-        json_schema_extra={'click_type':types.STRING,  },
+        description="URL, with or without a scheme",
     )
+
+    @field_validator("url", mode="before")
+    @classmethod
+    def add_default_scheme(
+        cls,
+        value: str,
+    ) -> str:
+        if isinstance(value, str) and "://" not in value:
+            return f"{DEFAULT_LINK_SCHEME}://{value}"
+        return value
 
     @property
     def qr_data(self) -> str:
@@ -71,48 +97,31 @@ class QRLinkModel(
             link=str(self.url),
         )
 
-    @classmethod
-    @field_validator("url", mode="before")
-    def url_validator(
-        cls,
-        value: str,
-    ) -> str:
-        if "://" not in value:
-            return f"{DEFAULT_LINK_SCHEME}://{value}"
-        return value
-
 
 class QRMailToModel(
-    _QRDataBaseModel,
+    QRDataModel,
 ):
     to: EmailStr = Field(
-        description="Recipient",
         alias="t",
+        description="Recipient",
     )
-    subject: Optional[str] = Field(
+    subject: str | None = Field(
         None,
         alias="s",
+        description="E-mail subject",
     )
     cc: tuple[EmailStr, ...] = Field(
         (),
-        description="Carbon copy",
-        json_schema_extra={
-            'click_option_multiple':True,
-        },
-
+        description="Carbon copy, repeat for several addresses",
     )
     bcc: tuple[EmailStr, ...] = Field(
         (),
-        description="Blind carbon copy",
-        json_schema_extra={
-            'click_option_multiple':True,
-        },
-
+        description="Blind carbon copy, repeat for several addresses",
     )
-    body: Optional[str] = Field(
+    body: str | None = Field(
         None,
-        description="E-mail body",
         alias="b",
+        description="E-mail body",
     )
 
     @property
@@ -122,60 +131,59 @@ class QRMailToModel(
         if self.subject:
             args.append(f"subject={quote(self.subject)}")
         if self.cc:
-            args.append(f'cc={quote(",".join(self.cc))}')
+            args.append(f"cc={quote(','.join(self.cc))}")
         if self.bcc:
-            args.append(f'bcc={quote(",".join(self.bcc))}')
+            args.append(f"bcc={quote(','.join(self.bcc))}")
         if self.body:
             args.append(f"body={quote(self.body)}")
-        return data if not args else f'{data}?{"&".join(args)}'
+        return data if not args else f"{data}?{'&'.join(args)}"
 
 
 class QRSMSModel(
-    _QRDataBaseModel,
+    QRDataModel,
 ):
     recipients: tuple[str, ...] = Field(
         alias="r",
-        json_schema_extra={
-            'click_option_multiple':True
-        },
-
+        description="Recipient number, repeat for several recipients",
     )
-    body: Optional[str] = Field(
+    body: str | None = Field(
         None,
         alias="b",
+        description="Message text",
     )
 
     @property
     def qr_data(self) -> str:
         body_dict = {"body": self.body} if self.body else {}
         return make_link_data(
-            schema=DataScheme.SMS,
+            scheme=DataScheme.SMS,
             link=self.recipients,
             params=body_dict,
         )
 
 
 class QRTelModel(
-    _QRDataBaseModel,
+    QRDataModel,
 ):
     tel: str = Field(
-        description="Telephone number",
         alias="t",
+        description="Telephone number",
     )
 
     @property
     def qr_data(self) -> str:
         return make_link_data(
-            schema=DataScheme.TEL,
+            scheme=DataScheme.TEL,
             link=self.tel,
         )
 
 
 class QRTextModel(
-    _QRDataBaseModel,
+    QRDataModel,
 ):
     text: str = Field(
         alias="t",
+        description="Arbitrary text to encode",
     )
 
     @property
@@ -184,54 +192,59 @@ class QRTextModel(
 
 
 class QRWiFiModel(
-    _QRDataBaseModel,
+    QRDataModel,
 ):
     ssid: str = Field(
-        description="Network SSID",
         alias="id",
+        description="Network SSID",
     )
-    security: Optional[AuthType] = Field(
+    security: AuthType | None = Field(
         None,
-        description="Authentication type",
         alias="s",
-        json_schema_extra={
-            'click_option_type':types.Choice(  # type: ignore
-        AuthType.get_values(),
-        case_sensitive=False,
+        description="Authentication type",
     )
-        },
-    )
-    password: Optional[str] = Field(
+    password: SecretStr | None = Field(
         None,
         alias="p",
+        description="Network password",
     )
     hidden: bool = Field(
         False,
-        description="True if the SSID is hidden",
         alias="h",
-        json_schema_extra={
-            'click_option_type':types.BOOL,
-        },
-
+        description="Set if the SSID is hidden",
     )
+
+    @model_validator(mode="after")
+    def check_security_and_password(self) -> "QRWiFiModel":
+        if self.security is not None and self.password is None:
+            msg = "password is required when security is set"
+            raise ValueError(msg)
+        return self
 
     @property
     def qr_data(self) -> str:
-        if self.security is AuthType.WPA2:
-            self.security = AuthType.WPA
-        for spec_char in MECARD_SPECIAL_CHARACTERS:
-            self.ssid = self.ssid.replace(spec_char, f"\\{spec_char}")
-            if self.password:
-                self.password = self.password.replace(spec_char, f"\\{spec_char}")
         fields = {
-            WifiMecardParam.SSID: self.ssid,
+            WifiMecardParam.SSID: _escape_mecard(self.ssid),
         }
         if self.hidden:
             fields[WifiMecardParam.HIDDEN] = "true"
-        if self.security and self.password:
-            fields[WifiMecardParam.PASSWORD] = self.password
-            fields[WifiMecardParam.AUTH] = self.security.name
+        if self.password is not None:
+            # WPA2 networks are advertised as WPA: the MECARD format has no
+            # separate token for them and readers expect "WPA".
+            security = AuthType.WPA if self.security in (None, AuthType.WPA2) else self.security
+            fields[WifiMecardParam.PASSWORD] = _escape_mecard(self.password.get_secret_value())
+            fields[WifiMecardParam.AUTH] = security.name
+        else:
+            fields[WifiMecardParam.AUTH] = "nopass"
         return make_mecard_data(
             title=DataScheme.WIFI.value,
             fields=fields,
         )
+
+
+def _escape_mecard(
+    value: str,
+) -> str:
+    for spec_char in MECARD_SPECIAL_CHARACTERS:
+        value = value.replace(spec_char, f"\\{spec_char}")
+    return value

@@ -3,17 +3,39 @@
 SOURCE_DIR := "makeqr"
 TESTS_DIR := "tests"
 
-lint: mypy ruff
+# List available recipes
+default:
+  @just --list
 
-mypy:
-  poetry run python -m mypy --pretty --package {{ SOURCE_DIR }}
+# Install the project and dev dependencies
+sync:
+  uv sync
+
+# Install git hooks (requires: uv tool install prek)
+hooks:
+  prek install
+
+# Run every check: lint, formatting, types
+lint: ruff fmt-check types
 
 ruff:
-  poetry run python -m ruff check --fix {{ SOURCE_DIR }}
-  poetry run python -m ruff check --fix --unsafe-fixes {{ TESTS_DIR }}
+  uv run ruff check {{ SOURCE_DIR }} {{ TESTS_DIR }}
 
+fmt-check:
+  uv run ruff format --check {{ SOURCE_DIR }} {{ TESTS_DIR }}
+
+types:
+  uv run ty check
+
+# Auto-fix what can be auto-fixed, then format
+fix:
+  uv run ruff check --fix {{ SOURCE_DIR }} {{ TESTS_DIR }}
+  uv run ruff format {{ SOURCE_DIR }} {{ TESTS_DIR }}
+
+# Format sources
 format:
-  poetry run python -m ruff format {{ SOURCE_DIR }} {{ TESTS_DIR }}
+  uv run ruff format {{ SOURCE_DIR }} {{ TESTS_DIR }}
 
-tests:
-  poetry run pytest -vv {{ TESTS_DIR }}
+# Run the test suite
+test:
+  uv run pytest -vv {{ TESTS_DIR }}

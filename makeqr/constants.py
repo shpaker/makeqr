@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import StrEnum
 
 DEFAULT_LINK_SCHEME = "https"
 DEFAULT_IMAGE_FORMAT = "png"
 MECARD_SPECIAL_CHARACTERS: str = r'\;,:"'
 
 
-class AuthType(str, Enum):
+class AuthType(StrEnum):
     WPA = "wpa"
     WPA2 = "wpa2"
     WEP = "wep"
@@ -17,14 +17,14 @@ class AuthType(str, Enum):
         return tuple(auth.value for auth in cls)
 
 
-class WifiMecardParam(str, Enum):
+class WifiMecardParam(StrEnum):
     HIDDEN = "H"
     SSID = "S"
     AUTH = "T"
     PASSWORD = "P"
 
 
-class DataScheme(str, Enum):
+class DataScheme(StrEnum):
     WIFI = "WIFI"
     MAILTO = "mailto"
     TEL = "tel"
@@ -32,7 +32,7 @@ class DataScheme(str, Enum):
     GEO = "geo"
 
 
-class ErrorCorrectionLevel(str, Enum):
+class ErrorCorrectionLevel(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     QUARTILE = "quartile"
@@ -42,4 +42,4 @@ class ErrorCorrectionLevel(str, Enum):
     def get_values(
         cls,
     ) -> tuple[str, ...]:
-        return tuple(auth.value for auth in cls)
+        return tuple(level.value for level in cls)

@@ -1,58 +1,100 @@
-[tool.poetry]
-name = "MakeQR"
-version = "0.1.0"
-description = "Generate QR cards for any occasion"
-authors = ["Aleksandr Shpak <shpaker@gmail.com>"]
-classifiers=[
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
+[project]
+name = "makeqr"
+version = "5.0.0"
+description = "Generate QR codes for links, WiFi networks, geo points, e-mail, SMS and more"
 readme = "README.md"
-repository = "https://github.com/shpaker/makeqr"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [
+  { name = "Aleksandr Shpak", email = "shpaker@gmail.com" },
+]
+keywords = ["qr", "qrcode", "cli", "wifi", "vcard", "mecard"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Multimedia :: Graphics",
+  "Topic :: Utilities",
+  "Typing :: Typed",
+]
+dependencies = [
+  "click>=8.1",
+  "pydantic[email]>=2.0",
+  "qrcode[pil]>=8.0",
+]
 
-[tool.poetry.scripts]
-makeqr = 'makeqr.__main__:main'
+[project.urls]
+Homepage = "https://github.com/shpaker/makeqr"
+Repository = "https://github.com/shpaker/makeqr"
+Changelog = "https://github.com/shpaker/makeqr/blob/main/CHANGELOG.md"
+Issues = "https://github.com/shpaker/makeqr/issues"
+
+[project.scripts]
+makeqr = "makeqr.cli:main"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.9,<0.12"]
+build-backend = "uv_build"
 
-[tool.poetry.dependencies]
-python = ">=3.9,<4.0.0"
-click = ">=8.1"
-pydantic = {extras = ["email"], version = ">=2.0"}
-qrcode = {extras = ["pil"], version = ">=7.0"}
+[tool.uv.build-backend]
+# Flat layout: the package sits at the repository root.
+module-root = ""
 
-[tool.poetry.group.dev.dependencies]
-mypy = "^1.8"
-pytest = "^8.0"
-ruff = "^0.3"
-types-pillow = "^10.2.0.20240213"
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=6.0",
+  "ruff>=0.14",
+  "ty>=0.0.73",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=makeqr --cov-report=term-missing"
+
+[tool.coverage.run]
+branch = true
+source = ["makeqr"]
+
+[tool.coverage.report]
+fail_under = 90
+exclude_also = [
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+]
+
+[tool.ty.src]
+include = ["makeqr", "tests"]
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py311"
 line-length = 120
-exclude = [
-  ".venv",
-]
-lint.ignore = [
+
+[tool.ruff.lint]
+ignore = [
   "PLR0913",  # Too many arguments to function call
+  "PLR0917",  # Too many positional arguments -- click passes options positionally
 ]
-lint.flake8-tidy-imports.ban-relative-imports = "all"
-lint.mccabe.max-complexity = 20
-lint.select = [
+mccabe.max-complexity = 20
+flake8-tidy-imports.ban-relative-imports = "all"
+select = [
   "F", # Pyflakes
   # "E/W", # pycodestyle
   "C90", # mccabe
-   "I", # isort
+  "I", # isort
   # "N", # pep8-naming
   # "D", # pydocstyle
   "UP", # pyupgrade
   "YTT", # flake8-2020
   # "ANN", # flake8-annotations
   # "ASYNC", # flake8-async
-  # "TRIO", # flake8-trio
   # "S", # flake8-bandit
   # "BLE", # flake8-blind-except
   # "FBT", # flake8-boolean-trap
@@ -67,7 +109,7 @@ lint.select = [
   # "EM", # flake8-errmsg
   "EXE", # flake8-executable
   # "FA", # flake8-future-annotations
-  "ISC", # flake8-implicit-str-concat
+  # "ISC", # flake8-implicit-str-concat -- conflicts with the formatter
   # "ICN", # flake8-import-conventions
   "G", # flake8-logging-format
   "INP", # flake8-no-pep420
@@ -102,14 +144,5 @@ lint.select = [
   "RUF", # Ruff-specific rules
 ]
 
-[tool.mypy]
-python_version = 3.9
-plugins = [
-  "pydantic.mypy"
-]
-
-[tool.pydantic-mypy]
-init_forbid_extra = true
-init_typed = true
-warn_required_dynamic_aliases = true
-
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["PLR2004"]  # magic values are fine in assertions
