@@ -209,8 +209,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.1" },
-    { name = "pydantic", extras = ["email"], specifier = ">=2.0" },
-    { name = "qrcode", extras = ["pil"], specifier = ">=8.0" },
+    { name = "pydantic", extras = ["email"], specifier = ">=2.13.4" },
+    { name = "qrcode", extras = ["pil"], specifier = ">=8.2" },
 ]
 
 [package.metadata.requires-dev]

@@ -26,8 +26,8 @@ classifiers = [
 ]
 dependencies = [
   "click>=8.1",
-  "pydantic[email]>=2.0",
-  "qrcode[pil]>=8.0",
+  "pydantic[email]>=2.13.4",
+  "qrcode[pil]>=8.2",
 ]
 
 [project.urls]
@@ -40,7 +40,7 @@ Issues = "https://github.com/shpaker/makeqr/issues"
 makeqr = "makeqr.cli:main"
 
 [build-system]
-requires = ["uv_build>=0.9,<0.12"]
+requires = ["uv_build>=0.12.5,<0.13"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
