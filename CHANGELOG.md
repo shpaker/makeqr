@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [5.0.0]
+## [5.0.0] - 2026-08-27
 
 ### Fixed
 
@@ -31,11 +31,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Four new commands: `vcard` (a vCard 3.0 contact), `mecard` (a MeCard
+  contact), `event` (a calendar event) and `otp` (a TOTP/HOTP provisioning
+  key). The OTP secret is a `SecretStr` and is masked in verbose output, like
+  the WiFi password.
 - Open WiFi networks are marked `T:nopass`, as the MECARD format expects.
 - `py.typed`, so type hints reach downstream users.
 - `CHANGELOG.md`, `LICENSE` and `SECURITY.md`.
 - Help text for every option, a description for every command, and a README
-  that documents all seven commands and the global options.
+  that documents all eleven commands and the global options.
+- `make_mecard_data` accepts any `StrEnum` mapping, not only WiFi parameters.
 
 ### Changed
 
@@ -46,6 +51,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Errors are raised as click exceptions instead of calling `sys.exit`.
 - Commands are discovered from `QRDataModel` subclasses, and click option types
   are inferred from field annotations, so the models no longer import click.
+- Long option names spell underscores as dashes: a `first_name` field becomes
+  `--first-name`.
 - Packaging moved to uv and PEP 621; the version is read from package metadata.
 - The command line lives in `makeqr.cli` (was `makeqr.cli_app`), and importing
   `makeqr` no longer pulls in click.

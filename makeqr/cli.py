@@ -142,7 +142,7 @@ def _make_click_params_from_model(
 
         # A short flag needs an alias to derive its name from; long-only is
         # better than the "-None" a missing alias used to produce.
-        names = [f"--{name}"]
+        names = [f"--{name.replace('_', '-')}"]
         if model_field.alias:
             names.insert(0, f"-{model_field.alias}")
 

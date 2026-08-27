@@ -23,8 +23,15 @@ def test_version() -> None:
 def test_help_lists_every_command() -> None:
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0, result.output
-    for command in ("geo", "link", "mailto", "sms", "tel", "text", "wifi"):
+    commands = ("event", "geo", "link", "mailto", "mecard", "otp", "sms", "tel", "text", "vcard", "wifi")
+    for command in commands:
         assert command in result.stdout
+
+
+def test_event() -> None:
+    result = runner.invoke(app, ["-qv", "event", "-s", "Standup", "-st", "2026-09-01T12:00:00"])
+    assert result.exit_code == 0, result.output
+    assert "DTSTART:20260901T120000" in result.stdout
 
 
 def test_geo() -> None:
@@ -67,6 +74,24 @@ def test_mailto_help_has_no_none_flag() -> None:
     assert "-None" not in result.stdout
 
 
+def test_mecard() -> None:
+    result = runner.invoke(app, ["-qv", "mecard", "-f", "John", "Doe"])
+    assert result.exit_code == 0, result.output
+    assert "MECARD:N:Doe,John;;" in result.stdout
+
+
+def test_otp() -> None:
+    result = runner.invoke(app, ["-qv", "otp", "-l", "alice@example.com", "-s", "JBSWY3DPEHPK3PXP", "-i", "Example"])
+    assert result.exit_code == 0, result.output
+    assert "otpauth://totp/Example%3Aalice%40example.com" in result.stdout
+
+
+def test_otp_secret_is_never_printed() -> None:
+    result = runner.invoke(app, ["-qv", "otp", "-l", "alice@example.com", "-s", "JBSWY3DPEHPK3PXP"])
+    assert result.exit_code == 0, result.output
+    assert "JBSWY3DPEHPK3PXP" not in result.stdout
+
+
 def test_sms() -> None:
     result = runner.invoke(app, ["-qv", "sms", "-r", "test"])
     assert result.exit_code == 0, result.output
@@ -83,6 +108,20 @@ def test_text() -> None:
     result = runner.invoke(app, ["-qv", "text", "hello"])
     assert result.exit_code == 0, result.output
     assert "Encoded: hello" in result.stdout
+
+
+def test_vcard() -> None:
+    result = runner.invoke(app, ["-qv", "vcard", "-f", "John", "-t", "+111", "-t", "+222", "Doe"])
+    assert result.exit_code == 0, result.output
+    assert "N:Doe;John" in result.stdout
+    assert "TEL:+222" in result.stdout
+
+
+def test_vcard_option_names_use_dashes() -> None:
+    result = runner.invoke(app, ["vcard", "--help"])
+    assert result.exit_code == 0, result.output
+    assert "--first-name" in result.stdout
+    assert "--first_name" not in result.stdout
 
 
 def test_wifi() -> None:
