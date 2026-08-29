@@ -11,10 +11,6 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: pypi
-    permissions:
-      contents: read
-      id-token: write  # mint the OIDC token for trusted publishing
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.0.1
@@ -29,4 +25,6 @@ jobs:
             exit 1
           fi
       - run: uv build
-      - run: uv publish --trusted-publishing always
+      - run: uv publish --check-url https://pypi.org/simple/
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_PASS }}
