@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-editable
 
 
-FROM python:3.13-slim-trixie AS runtime
+FROM python:3.14-slim-trixie AS runtime
 
 RUN useradd --create-home --uid 1000 makeqr
 COPY --from=builder --chown=makeqr:makeqr /app/.venv /app/.venv
