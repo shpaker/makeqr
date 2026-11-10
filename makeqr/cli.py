@@ -304,7 +304,7 @@ def _echo_version(
 @click.option(
     "--box-size",
     "-s",
-    type=click.INT,
+    type=click.IntRange(1),
     default=8,
     show_default=True,
     help="Pixel size of a single QR module.",
@@ -312,7 +312,7 @@ def _echo_version(
 @click.option(
     "--border",
     "-b",
-    type=click.INT,
+    type=click.IntRange(0),
     default=1,
     show_default=True,
     help="Width of the quiet zone, in modules.",

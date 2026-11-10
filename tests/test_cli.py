@@ -14,6 +14,18 @@ def test_unknown_command() -> None:
     assert result.exit_code == 2, result.output
 
 
+def test_negative_box_size_is_usage_error() -> None:
+    result = runner.invoke(app, ["--box-size=-1", "-q", "text", "hello"])
+    assert result.exit_code == 2, result.output
+    assert "Traceback" not in result.output
+
+
+def test_negative_border_is_usage_error() -> None:
+    result = runner.invoke(app, ["--border=-1", "-q", "text", "hello"])
+    assert result.exit_code == 2, result.output
+    assert "Traceback" not in result.output
+
+
 def test_version() -> None:
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0, result.output
